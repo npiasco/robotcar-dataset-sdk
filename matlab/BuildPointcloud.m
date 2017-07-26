@@ -85,6 +85,8 @@ function [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, extrin
   laser_timestamps = laser_timestamps(start_index:end_index, :);
   
   % Load transforms between laser/ins and vehicle
+  laser_timestamps = boundLaserTimestamps(laser_timestamps, ins_file);
+
   laser_extrinisics = dlmread([extrinsics_dir laser '.txt']);
   ins_extrinsics = dlmread([extrinsics_dir 'ins.txt']);
   
