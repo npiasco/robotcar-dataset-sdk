@@ -10,7 +10,7 @@ function [ X, Y ] = PlotVO( vo_file, varargin)
     fclose(ins_file_id);
 
     origine = VO{1}(1);
-  % Load transforms between laser/ins and vehicle
+
     timestamps = boundLaserTimestamps( VO{1}(1:end-1), vo_file);
 
     

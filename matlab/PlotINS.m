@@ -9,7 +9,6 @@ function [ X, Y ] = PlotINS( ins_file, varargin )
           '%u64 %s %f %f %f %f %f %f %s %f %f %f %f %f %f','Delimiter',',');
     fclose(ins_file_id);
     origine = INS{1}(1);
-  % Load transforms between laser/ins and vehicle
     timestamps = INS{1}(1:end-1);
 
     
