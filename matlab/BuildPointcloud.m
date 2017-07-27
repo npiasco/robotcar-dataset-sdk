@@ -85,18 +85,18 @@ function [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, extrin
   laser_timestamps = laser_timestamps(start_index:end_index, :);
   
   % Load transforms between laser/ins and vehicle
-  laser_timestamps = boundLaserTimestamps(laser_timestamps, ins_file);
 
   laser_extrinisics = dlmread([extrinsics_dir laser '.txt']);
   ins_extrinsics = dlmread([extrinsics_dir 'ins.txt']);
   
   % Find pose for each LIDAR scan, relative to origin
-  if (strfind(ins_file, 'ins.csv'))
+  if (strfind(ins_file, 'ins.csv')) % Using INS data
     ins_poses = InterpolatePoses(ins_file, laser_timestamps(:,1)', ...
       origin_timestamp);
     G_ins_laser = SE3MatrixFromComponents(ins_extrinsics) \ ...
       SE3MatrixFromComponents(laser_extrinisics);
-  else
+  else % Using VO data
+    laser_timestamps = boundLaserTimestamps(laser_timestamps, ins_file);
     ins_poses = RelativeToAbsolutePoses(ins_file, laser_timestamps(:,1)', ...
       origin_timestamp);
     G_ins_laser = SE3MatrixFromComponents(laser_extrinisics);
