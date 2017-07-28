@@ -6,8 +6,11 @@ clc;
 addpath matlab/
 %%
 run_number = '2014-06-24-14-47-45';
+%run_number = '2014-12-05-15-42-07';
 extrinsics_dir = 'extrinsics/';
 models_dir = 'models/';
+
+ref_gps_file = '../2014-12-05-15-42-07/gps/gps.csv';
 
 vo_file = ['../' run_number '/vo/vo.csv'];
 ins_file = ['../' run_number '/gps/ins.csv'];
@@ -38,7 +41,7 @@ PlotGPS(gps_file);
 PlotVO(vo_file);
 PlotINS(ins_file);
 
-CompareVOtoINS(ins_file, vo_file)
+CompareVOtoINS(ins_file, vo_file, gps_file)
 
 tic
 [Xi Yi] = GetImagePose(images_timestamps(:,1), vo_file);
@@ -47,5 +50,13 @@ figure
 plot(Xi,Yi);
 
 %%
-images_dir = '../2014-06-24-14-47-45/';
-CreatDataset( ins_file, images_dir, models_dir, 5 )
+
+images_dir = ['../' run_number '/'];
+CreatDataset( ins_file, ref_gps_file, images_dir, models_dir, 8, [true true true true], true, 'Dataset_rect');
+
+%%
+[X, Y] = PlotINS(ins_file);
+T1 = [X Y];
+[X, Y] = PlotGPS(ref_gps_file);
+T2 = [X Y];
+T3 = AlignTrajectories( T1, T2 );

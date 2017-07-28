@@ -1,7 +1,6 @@
 function [ X, Y ] = PlotINS( ins_file, varargin )
 %PLOTVO Summary of this function goes here
 %   Detailed explanation goes here
-    
 
     ins_file_id = fopen(ins_file);
     headers = textscan(ins_file_id, '%s', 15, 'Delimiter',',');
