@@ -5,8 +5,8 @@ clc;
 
 addpath matlab/
 %%
-run_number = '2014-06-24-14-47-45';
-%run_number = '2014-12-05-15-42-07';
+%run_number = '2014-06-24-14-47-45';
+run_number = '2014-12-05-15-42-07';
 extrinsics_dir = 'extrinsics/';
 models_dir = 'models/';
 
@@ -42,17 +42,10 @@ PlotVO(vo_file);
 PlotINS(ins_file);
 
 CompareVOtoINS(ins_file, vo_file, gps_file)
-
-tic
-[Xi Yi] = GetImagePose(images_timestamps(:,1), vo_file);
-toc
-figure
-plot(Xi,Yi);
-
 %%
 
 images_dir = ['../' run_number '/'];
-CreatDataset( ins_file, ref_gps_file, images_dir, models_dir, 8, [true true true true], true, 'Dataset_rect');
+CreatDataset( ins_file, ref_gps_file, images_dir, models_dir, 30, [false false false true], true, 'Test');
 
 %%
 [X, Y] = PlotINS(ins_file);

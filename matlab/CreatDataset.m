@@ -23,7 +23,7 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
     end
 
 
-    % Path creation from ins
+    %% Path creation from ins
     disp('Path creation from ins');
 
     ins_file_id = fopen(ins_file);
@@ -55,7 +55,7 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
         Y(i) = Poses{i}(2,4);
     end
     
-    %
+    %% Registration across reference path
     disp('Registration across reference path');
     T_to_align = [X Y];
     [Xref, Yref] = PlotGPS(path_ref);
@@ -75,13 +75,13 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
     X = T_aligned(:,1);
     Y = T_aligned(:,2);
     
-    % Path pruning with provided step
+    %% Path pruning with provided step
     disp('Path pruning');
     
     path = {};
     timestamps_path = [];
     
-    path{end+1} = [ X(i);  Y(i) ];
+    path{end+1} = [ X(1);  Y(1) ];
     timestamps_path(end+1) = timestamps(1);
     d = 0;
     for i = 2:l
@@ -112,7 +112,7 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
     end    
     
     disp(['Pruned path with ' int2str(length(path)) ' location (out off ' int2str(l) ')'])
-    disp(['Trying to extract ' int2str(length(path)*4) ' images'])
+    disp(['Trying to extract ' int2str(length(path)*sum(selected_views==true)) ' images'])
     
     continuing = input('Proceed? (y/n) ', 's');
     close(fig);
@@ -120,17 +120,18 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
         return
     end
     
-    % Closest images extraction according to path
+    %% Closest images extraction according to path
     disp('Closest images extraction');
     cameras = {'mono_left', 'mono_rear', 'mono_right', 'stereo'};
     for i=1:length(cameras)
+        disp(['Proceedings ' cameras{i} '...']);
         timestamps_file = [images_dir cameras{i} '.timestamps'];
         images_timestamps = dlmread(timestamps_file);
         
         closest_images_timestamps{i} = GetClosestImages(images_timestamps(:,1), timestamps_path);
     end
     
-    % Images saving and localization file creation    
+    %% Images saving and localization file creation    
     disp('Saving images and coord files');
     disp(['Saving images in ' images_dir directory '/images/']);
     mkdir([images_dir directory]);
@@ -164,12 +165,12 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
                 image = imcrop(image, rect);
             end
             imwrite(image, [images_dir directory '/images/image_' int2str(i) '_mono_left.png'], 'png');
-            fprintf(f_timestamps, '%s\t', closest_images_timestamps{1}(i));
+            fprintf(f_timestamps, '%f\t', closest_images_timestamps{1}(i));
         end
         if selected_views(2)
             image = LoadImage([images_dir cameras_dir{2}],closest_images_timestamps{2}(i),models{2});
             imwrite(image, [images_dir directory '/images/image_' int2str(i) '_mono_rear.png'], 'png');
-            fprintf(f_timestamps, '%s\t', closest_images_timestamps{2}(i));
+            fprintf(f_timestamps, '%f\t', closest_images_timestamps{2}(i));
 
         end
         if selected_views(3)
@@ -185,19 +186,19 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
                 image = imcrop(image, rect);
             end
             imwrite(image, [images_dir directory '/images/image_' int2str(i) '_mono_right.png'], 'png');
-            fprintf(f_timestamps, '%s\t', closest_images_timestamps{3}(i));
+            fprintf(f_timestamps, '%f\t', closest_images_timestamps{3}(i));
         end
         if selected_views(4)
             image = LoadImage([images_dir cameras_dir{4}],closest_images_timestamps{4}(i),models{4});
             imwrite(image, [images_dir directory '/images/image_' int2str(i) '_stereo_centre.png'], 'png');
-            fprintf(f_timestamps, '%s\t', closest_images_timestamps{4}(i));            
+            fprintf(f_timestamps, '%f\t', closest_images_timestamps{4}(i));
         end
         fprintf(f, '%20.18f\t', path{i});
         fprintf(f, '\n');
         fprintf(f_timestamps, '\n');
 
         if ~mod(i,5)
-            disp(['Saving progression: ' int2str(i*4) ' / ' int2str(length(path)*4)])
+            disp(['Saving progression: ' int2str(i*sum(selected_views==true)) ' / ' int2str(length(path)*sum(selected_views==true))])
         end
     end
     fclose(f);
