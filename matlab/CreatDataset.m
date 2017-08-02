@@ -1,4 +1,4 @@
-function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selected_views, correct_rotation, directory, display)
+function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selected_views, correct_rotation, directory, crop_path, display)
 %CREATDATASET Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -21,10 +21,18 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
         directory = 'Dataset';
         disp('Saving directory is Dataset')
     end
+    
+    if ~exist('crop_path', 'var')
+        crop_path = 1;
+        disp('Keeping the entire path')
+    end
+
 
 
     %% Path creation from ins
     disp('Path creation from ins');
+    
+    droping = 6; % not enought memory in ram
 
     ins_file_id = fopen(ins_file);
     if strcmp(ins_file(end-6:end-4), 'ins')    
@@ -33,7 +41,7 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
           '%f %s %f %f %f %f %f %f %s %f %f %f %f %f %f','Delimiter',',');        
 
         origine = INS{1}(1);
-        timestamps = INS{1}(1:end-1);
+        timestamps = INS{1}(1:droping:end-1);
         Poses = InterpolatePoses(ins_file, timestamps', origine);        
     else % VO
         headers = textscan(ins_file_id, '%s', 8, 'Delimiter',',');
@@ -46,7 +54,7 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
     end
     fclose(ins_file_id);
 
-    l = length(Poses);
+    l = floor(crop_path*length(Poses));
     X = zeros(l,1);
     Y = zeros(l,1);
 
@@ -78,22 +86,9 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
     %% Path pruning with provided step
     disp('Path pruning');
     
-    path = {};
-    timestamps_path = [];
+    [path timestamps_path] = PrunePath(X, Y, timestamps, step, true);
     
-    path{end+1} = [ X(1);  Y(1) ];
-    timestamps_path(end+1) = timestamps(1);
-    d = 0;
-    for i = 2:l
-        d = d + norm([X(i); Y(i)] - [X(i-1); Y(i-1)]);
-        if d > step
-            path{end+1} = [X(i); Y(i)];
-            timestamps_path(end+1) = timestamps(i);
-            d = 0;
-        end
-    end
-    
-    fig = figure;
+    figure;
     if display
         path_l = length(path);
         
@@ -109,13 +104,14 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
         hold on;
         plot(Xp,Yp,'*r');
         legend('Original path','Pruned path');
-    end    
+		hold off;
+    end   
     
     disp(['Pruned path with ' int2str(length(path)) ' location (out off ' int2str(l) ')'])
     disp(['Trying to extract ' int2str(length(path)*sum(selected_views==true)) ' images'])
     
     continuing = input('Proceed? (y/n) ', 's');
-    close(fig);
+    
     if ~strcmp(continuing, 'y')
         return
     end
@@ -139,7 +135,14 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
     
     disp(['Saving coord in ' images_dir directory '/coord.txt']);
     f = fopen([images_dir directory '/coord.txt'], 'wt'); 
+    f_coordxIm = fopen([images_dir directory '/coordxIm.txt'], 'wt');
     
+    f_info = fopen([images_dir directory '/info.txt'], 'wt');images_dir
+    fprintf(f_info, 'Run in directory %s\n', images_dir);
+    fprintf(f_info, 'Image taken at step: %f\n', step);
+    fprintf(f_info, 'With a reduction of the original trajectory of: %f percents\n', crop_path);
+    fclose(f_info);
+     
     disp(['Saving also images_timestamps in ' images_dir directory '/timestamps.txt']);
     f_timestamps = fopen([images_dir directory '/timestamps.txt'], 'wt'); 
     
@@ -164,14 +167,17 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
                 rect = [floor((W-Wcroop)/2) floor((H-Hcroop)/2) Wcroop Hcroop];
                 image = imcrop(image, rect);
             end
-            imwrite(image, [images_dir directory '/images/image_' int2str(i) '_mono_left.png'], 'png');
+            imwrite(image, [images_dir directory '/images/image_' num2str(i,'%0.6d') '_mono_left.jpg'], 'jpg');
             fprintf(f_timestamps, '%f\t', closest_images_timestamps{1}(i));
+            fprintf(f_coordxIm, '%20.18f\t', path{i});
+            fprintf(f_coordxIm, '\n');
         end
         if selected_views(2)
             image = LoadImage([images_dir cameras_dir{2}],closest_images_timestamps{2}(i),models{2});
-            imwrite(image, [images_dir directory '/images/image_' int2str(i) '_mono_rear.png'], 'png');
+            imwrite(image, [images_dir directory '/images/image_' num2str(i,'%0.6d') '_mono_rear.jpg'], 'jpg');
             fprintf(f_timestamps, '%f\t', closest_images_timestamps{2}(i));
-
+            fprintf(f_coordxIm, '%20.18f\t', path{i});
+            fprintf(f_coordxIm, '\n');
         end
         if selected_views(3)
             image = LoadImage([images_dir cameras_dir{3}],closest_images_timestamps{3}(i),models{3});
@@ -185,13 +191,17 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
                 rect = [floor((W-Wcroop)/2) floor((H-Hcroop)/2) Wcroop Hcroop];
                 image = imcrop(image, rect);
             end
-            imwrite(image, [images_dir directory '/images/image_' int2str(i) '_mono_right.png'], 'png');
+            imwrite(image, [images_dir directory '/images/image_' num2str(i,'%0.6d') '_mono_right.jpg'], 'jpg');
             fprintf(f_timestamps, '%f\t', closest_images_timestamps{3}(i));
+            fprintf(f_coordxIm, '%20.18f\t', path{i});
+            fprintf(f_coordxIm, '\n');
         end
         if selected_views(4)
             image = LoadImage([images_dir cameras_dir{4}],closest_images_timestamps{4}(i),models{4});
-            imwrite(image, [images_dir directory '/images/image_' int2str(i) '_stereo_centre.png'], 'png');
+            imwrite(image, [images_dir directory '/images/image_' num2str(i,'%0.6d') '_stereo_centre.jpg'], 'jpg');
             fprintf(f_timestamps, '%f\t', closest_images_timestamps{4}(i));
+            fprintf(f_coordxIm, '%20.18f\t', path{i});
+            fprintf(f_coordxIm, '\n');
         end
         fprintf(f, '%20.18f\t', path{i});
         fprintf(f, '\n');
@@ -202,6 +212,8 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
         end
     end
     fclose(f);
+    fclose(f_coordxIm);
     fclose(f_timestamps);
     disp('Done.')
+    close all;
 end
