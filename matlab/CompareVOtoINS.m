@@ -18,4 +18,3 @@ function CompareVOtoINS( ins_file, vo_file, gps_file )
     end
     hold off;
 end
-
