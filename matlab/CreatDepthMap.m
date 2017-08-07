@@ -79,6 +79,7 @@ function [grayDepthMap, jetDepthMap] = CreatDepthMap(image_dir, laser_dir, ins_f
       regexp(image_dir, '(stereo|mono_left|mono_right|mono_rear)', 'match');
   camera = camera{end};
   
+  %TODO: ICP sur les deux pc
   switch camera
       case 'stereo'
           [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, ...
@@ -208,6 +209,6 @@ function [grayDepthMap, jetDepthMap] = CreatDepthMap(image_dir, laser_dir, ins_f
   end
   
   grayDepthMap = med;
-  jetDepthMap = ind2rgb(gray2ind(med), jet);
+  jetDepthMap = ind2rgb(gray2ind(med,1024), jet(1024));
 
 end
