@@ -27,8 +27,6 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
         disp('Keeping the entire path')
     end
 
-
-
     %% Path creation from ins
     disp('Path creation from ins');
     
@@ -137,7 +135,7 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
     f = fopen([images_dir directory '/coord.txt'], 'wt'); 
     f_coordxIm = fopen([images_dir directory '/coordxIm.txt'], 'wt');
     
-    f_info = fopen([images_dir directory '/info.txt'], 'wt');images_dir
+    f_info = fopen([images_dir directory '/info.txt'], 'wt');
     fprintf(f_info, 'Run in directory %s\n', images_dir);
     fprintf(f_info, 'Image taken at step: %f\n', step);
     fprintf(f_info, 'With a reduction of the original trajectory of: %f percents\n', crop_path);

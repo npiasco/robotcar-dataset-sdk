@@ -70,12 +70,12 @@ function ProjectLaserIntoCamera(image_dir, laser_dir, ins_file, models_dir, extr
       end
     end
   end
-
+  
   % Combine LIDAR scans into a single pointcloud
   % Use a 10 second window either side of the image
   [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, ...
     extrinsics_dir, image_timestamp-1e7, image_timestamp+1e7, image_timestamp);
-  
+    
   camera = ...
       regexp(image_dir, '(stereo|mono_left|mono_right|mono_rear)', 'match');
   camera = camera{end};
