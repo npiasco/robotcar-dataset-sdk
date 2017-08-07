@@ -15,9 +15,9 @@ models_dir = 'models/';
 
 %%
 
-run_number = train_2;
+run_number = '2014-05-14-13-50-20';
 
-ref_gps_file =  ['../training/' train_1 '/gps/gps.csv'];
+ref_gps_file =  ['../training/' run_number '/gps/gps.csv'];
 vo_file = ['../training/' run_number '/vo/vo.csv'];
 ins_file = ['../training/' run_number '/gps/ins.csv'];
 
@@ -32,4 +32,4 @@ gps_file = ['../training/' run_number '/gps/gps.csv'];
 CompareVOtoINS(ins_file, vo_file, gps_file)
 %%
 images_dir = ['../training/' run_number '/'];
-CreatDataset( ins_file, ref_gps_file, images_dir, models_dir, 10, [true true true true], true, 'TrainDataset2'); % Dataset
+CreatDataset( vo_file, ref_gps_file, images_dir, models_dir, 10, [true true false false], true, 'TrainDataset2', 0.1); % Dataset

@@ -28,30 +28,30 @@ function [grayDepthMap, jetDepthMap] = CreatDepthMap(image_dir, laser_dir, ins_f
     extrinsics_dir = [extrinsics_dir '/'];
   end
   
-  if ~exist('image_timestamp', 'var')
-    % Get timestamps from file, to avoid having to list whole image
-    % directory
-    camera = regexp(image_dir, 'stereo|mono_left|mono_right|mono_rear', 'match');
-    timestamp_file = [image_dir '../' camera{end} '.timestamps'];
-    if ~exist(timestamp_file, 'file')
-      timestamp_file = [image_dir '../../' camera{end} '.timestamps'];
-      if ~exist(timestamp_file, 'file')
-        error('Timestamp file for camera not found');
-      end
-    end
-    timestamps = dlmread(timestamp_file);
-     % Search for first chunk with data
-    for chunk = 1:timestamps(end,2)
-      timestamp_index = find(timestamps(:,2) == chunk, 1, 'first');
-      if isempty(timestamp_index)
-        error('No laser scans found in specified directory');
-      end
-      image_timestamp = timestamps(timestamp_index, 1);
-      if exist([image_dir num2str(image_timestamp) '.png'], 'file')
-        break;
-      end
-    end
-  end
+%   if ~exist('image_timestamp', 'var')
+%     % Get timestamps from file, to avoid having to list whole image
+%     % directory
+%     camera = regexp(image_dir, 'stereo|mono_left|mono_right|mono_rear', 'match');
+%     timestamp_file = [image_dir '../' camera{end} '.timestamps'];
+%     if ~exist(timestamp_file, 'file')
+%       timestamp_file = [image_dir '../../' camera{end} '.timestamps'];
+%       if ~exist(timestamp_file, 'file')
+%         error('Timestamp file for camera not found');
+%       end
+%     end
+%     timestamps = dlmread(timestamp_file);
+%      % Search for first chunk with data
+%     for chunk = 1:timestamps(end,2)
+%       timestamp_index = find(timestamps(:,2) == chunk, 1, 'first');
+%       if isempty(timestamp_index)
+%         error('No laser scans found in specified directory');
+%       end
+%       image_timestamp = timestamps(timestamp_index, 1);
+%       if exist([image_dir num2str(image_timestamp) '.png'], 'file')
+%         break;
+%       end
+%     end
+%   end
   
   laser = regexp(laser_dir, 'lms_front|lms_rear|ldmrs', 'match');
   laser_timestamp = [laser_dir '../' laser{end} '.timestamps'];

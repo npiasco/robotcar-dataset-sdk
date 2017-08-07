@@ -13,7 +13,7 @@ function SaveDepthMaps( timestamps, cameras, root_dir, correct_rotation, double_
     end
     
     im = dlmread(timestamps);
-    n_im = length(images)
+    n_im = length(im);
     
     mkdir([root_dir 'DepthMap/']);
     mkdir([root_dir 'DepthMap/gray']);
@@ -41,7 +41,8 @@ function SaveDepthMaps( timestamps, cameras, root_dir, correct_rotation, double_
             imwrite(jetDepthMap, [root_dir 'DepthMap/jet/' 'depth_' num2str(i,'%0.6d') '_mono_left.jpg'], 'jpg');
             imwrite(jetDepthMap, [root_dir 'DepthMap/jet/' 'depth_' num2str(i,'%0.6d') '_mono_left.png'], 'png');
             ind_cam = ind_cam + 1;
-        elseif cameras(2) % rear
+        end
+        if cameras(2) % rear
             [grayDepthMap, jetDepthMap] = CreatDepthMap([root_dir 'mono_rear/'], ...
                 [root_dir 'lms_front/'], [root_dir 'vo/vo.csv'], 'models/', 'extrinsics/', im(i,ind_cam) , double_scan, false);
             imwrite(grayDepthMap, [root_dir 'DepthMap/gray/' 'depth_' num2str(i,'%0.6d') '_mono_rear.jpg'], 'jpg');
@@ -49,7 +50,8 @@ function SaveDepthMaps( timestamps, cameras, root_dir, correct_rotation, double_
             imwrite(jetDepthMap, [root_dir 'DepthMap/jet/' 'depth_' num2str(i,'%0.6d') '_mono_rear.jpg'], 'jpg');
             imwrite(jetDepthMap, [root_dir 'DepthMap/jet/' 'depth_' num2str(i,'%0.6d') '_mono_rear.png'], 'png');
             ind_cam = ind_cam + 1;
-        elseif cameras(3) % right
+        end
+        if cameras(3) % right
             [grayDepthMap, jetDepthMap] = CreatDepthMap([root_dir 'mono_right/'], ...
                 [root_dir 'lms_front/'], [root_dir 'vo/vo.csv'], 'models/', 'extrinsics/', im(i,ind_cam) , double_scan, false);
             if correct_rotation
@@ -69,7 +71,8 @@ function SaveDepthMaps( timestamps, cameras, root_dir, correct_rotation, double_
             imwrite(jetDepthMap, [root_dir 'DepthMap/jet/' 'depth_' num2str(i,'%0.6d') '_mono_right.jpg'], 'jpg');
             imwrite(jetDepthMap, [root_dir 'DepthMap/jet/' 'depth_' num2str(i,'%0.6d') '_mono_right.png'], 'png');
             ind_cam = ind_cam + 1;
-        elseif cameras(4) % centre
+        end
+        if cameras(4) % centre
             [grayDepthMap, jetDepthMap] = CreatDepthMap([root_dir 'stereo/centre/'], ...
                 [root_dir 'lms_front/'], [root_dir 'vo/vo.csv'], 'models/', 'extrinsics/', im(i,ind_cam) , double_scan, false);
             imwrite(grayDepthMap, [root_dir 'DepthMap/gray/' 'depth_' num2str(i,'%0.6d') '_stereo_centre.jpg'], 'jpg');
