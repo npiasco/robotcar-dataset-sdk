@@ -2,13 +2,13 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
 %SAVEDEPTHMAPS Summary of this function goes here
 %   Detailed explanation goes here
 %   Use Bevilacqua algorithm
-    parpool(6);
+    parpool(12);
+
     
-    inpainting_path = '~/Dev/Code/marcoslug-lidar_image/code_matlab';
+    inpainting_path = '~/Dev/marcos-lidar_image/';
     addpath(inpainting_path)
     addpath([inpainting_path, '/toolbox_general'])
     addpath([inpainting_path, '/TVL2_classique'])
-    addpath([inpainting_path, '/toolbox_signal'])
     
     if ~exist('correct_rotation', 'var')
         correct_rotation = false;
