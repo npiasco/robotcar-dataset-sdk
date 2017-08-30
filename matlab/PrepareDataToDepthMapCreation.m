@@ -1,4 +1,4 @@
-function [grayDepthMap, jetDepthMap] = CreatDepthMap(image_dir, laser_dir, ins_file, models_dir, extrinsics_dir, image_timestamp, opt_laser, disp)
+function [im, rm, fm, outMask] = PrepareDataToDepthMapCreation(image_dir, laser_dir, ins_file, models_dir, extrinsics_dir, image_timestamp, opt_laser, disp)
   
 % Inspired form ProjectLaserIntoCamera 
 %
@@ -27,31 +27,6 @@ function [grayDepthMap, jetDepthMap] = CreatDepthMap(image_dir, laser_dir, ins_f
   if extrinsics_dir(end) ~= '/'
     extrinsics_dir = [extrinsics_dir '/'];
   end
-  
-%   if ~exist('image_timestamp', 'var')
-%     % Get timestamps from file, to avoid having to list whole image
-%     % directory
-%     camera = regexp(image_dir, 'stereo|mono_left|mono_right|mono_rear', 'match');
-%     timestamp_file = [image_dir '../' camera{end} '.timestamps'];
-%     if ~exist(timestamp_file, 'file')
-%       timestamp_file = [image_dir '../../' camera{end} '.timestamps'];
-%       if ~exist(timestamp_file, 'file')
-%         error('Timestamp file for camera not found');
-%       end
-%     end
-%     timestamps = dlmread(timestamp_file);
-%      % Search for first chunk with data
-%     for chunk = 1:timestamps(end,2)
-%       timestamp_index = find(timestamps(:,2) == chunk, 1, 'first');
-%       if isempty(timestamp_index)
-%         error('No laser scans found in specified directory');
-%       end
-%       image_timestamp = timestamps(timestamp_index, 1);
-%       if exist([image_dir num2str(image_timestamp) '.png'], 'file')
-%         break;
-%       end
-%     end
-%   end
   
   laser = regexp(laser_dir, 'lms_front|lms_rear|ldmrs', 'match');
   laser_timestamp = [laser_dir '../' laser{end} '.timestamps'];
@@ -83,35 +58,39 @@ function [grayDepthMap, jetDepthMap] = CreatDepthMap(image_dir, laser_dir, ins_f
   switch camera
       case 'stereo'
           [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, ...
-    extrinsics_dir, image_timestamp-1e7, laser_timestamp(end, 1), image_timestamp);
+    extrinsics_dir, laser_timestamp(1, 1), laser_timestamp(end, 1), image_timestamp);
           if opt_laser
-            [pointcloud2, reflectance] = BuildPointcloud(opt_laser, ins_file, ...
+            [pointcloud2, reflectance2] = BuildPointcloud(opt_laser, ins_file, ...
     extrinsics_dir, image_timestamp-1e7, opt_laser_timestamp(end, 1), image_timestamp);
             pointcloud = [pointcloud pointcloud2];
+            reflectance = [reflectance reflectance2];
           end
       case 'mono_left'
           [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, ...
     extrinsics_dir, image_timestamp-1e7, image_timestamp+1e7, image_timestamp);
           if opt_laser
-            [pointcloud2, reflectance] = BuildPointcloud(opt_laser, ins_file, ...
+            [pointcloud2, reflectance2] = BuildPointcloud(opt_laser, ins_file, ...
     extrinsics_dir, image_timestamp-1e7, image_timestamp+1e7, image_timestamp);
             pointcloud = [pointcloud pointcloud2];
+            reflectance = [reflectance reflectance2];
           end
       case 'mono_right'
           [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, ...
     extrinsics_dir, image_timestamp-1e7, image_timestamp+1e7, image_timestamp);
           if opt_laser
-            [pointcloud2, reflectance] = BuildPointcloud(opt_laser, ins_file, ...
+            [pointcloud2, reflectance2] = BuildPointcloud(opt_laser, ins_file, ...
     extrinsics_dir, image_timestamp-1e7, image_timestamp+1e7, image_timestamp);
             pointcloud = [pointcloud pointcloud2];
+            reflectance = [reflectance reflectance2];
           end
       case 'mono_rear'
           [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, ...
-    extrinsics_dir, laser_timestamp(1,1), image_timestamp+1e7, image_timestamp);
+    extrinsics_dir, laser_timestamp(1,1), laser_timestamp(end,1), image_timestamp);
           if opt_laser
-            [pointcloud2, reflectance] = BuildPointcloud(opt_laser, ins_file, ...
+            [pointcloud2, reflectance2] = BuildPointcloud(opt_laser, ins_file, ...
     extrinsics_dir, opt_laser_timestamp(1,1), image_timestamp+1e7, image_timestamp);
             pointcloud = [pointcloud pointcloud2];
+            reflectance = [reflectance reflectance2];
           end
   end
   
@@ -165,49 +144,59 @@ function [grayDepthMap, jetDepthMap] = CreatDepthMap(image_dir, laser_dir, ins_f
     warning('Very few points project into image. Is the vehicle stationary?');
   end
   
-  factor = 0.4;
-  uv = ceil(uv(in_img,:)*factor);
+  uv = ceil(uv(in_img,:));
     % Colour pointcloud by depth. Alternately, could use reflectance
   colours = xyz(in_front(in_img), 3);
-  u_colours = colours;
-  u_colours(u_colours>150) = 150;
-  u_colours = u_colours / max(u_colours);
-  [X ind] = sort(colours, 'descend');
+  reflectance_colours = reflectance(in_front(in_img));
   [h, w, c] = size(image);
-  dim = zeros(round(h*factor), round(w*factor), 3);
-  step = 1;
+  rm = zeros(h, w, 1);
+  fm = zeros(h, w, 1);
+  outMask = zeros(h, w, 1);
   
-  raw_colours = zeros(length(ind(1:step:end)),3);
-  for i=1:length(ind(1:step:end))
-      %raw_colours(i,:) = tab_jet(round(64*u_colours(ind(i))),:)*255;
-      val = round(u_colours(ind(i))*255);
-      raw_colours(i,:) = ones(3,1)*val;
+  % Filtering huge range data
+  m_range = 100;
+  colours(colours>m_range)=0;
+  
+  for i=1:length(uv)
+      rm(uv(i,2),uv(i,1)) = colours(i);
+      fm(uv(i,2),uv(i,1)) = reflectance_colours(i);
+      outMask(uv(i,2),uv(i,1)) = 1; 
   end
-  dim_circle = insertShape(dim, 'FilledCircle', ...
-      [uv(ind(1:step:end),:) ones(length(ind(1:step:end)),1)*5], ...
-      'Color', raw_colours, 'Opacity', 1);
+  se = strel('disk',25);
+  outMask = imdilate(outMask,se);
   
-  unitone_dim = dim_circle(:,:,1)/255;
-  med = medfilt2(unitone_dim, [11,11]);
-  med(med==0) = nan; 
-
-  if disp
-      clf;
-      figure
-      subplot(2,2,1)
-      imshow(imresize(image, factor));
-      subplot(2,2,2)
-      imshow(unitone_dim)
-      subplot(2,2,3)
-      imshow(med)
-      subplot(2,2,4)
-      imshow(imresize(image, factor));
-      colormap jet;
-      hold on;
-      scatter(uv(:,1),uv(:,2), 90, colours, '.');
+  outMask(floor(h*0.4):end,:) = 1;
+  outMask = medfilt2(outMask, [10 10]);
+  
+  cc = bwconncomp(outMask, 4);
+  if cc.NumObjects > 1
+    bigger = 1;
+    for i=2:cc.NumObjects
+        if length(cc.PixelIdxList{i}) > length(cc.PixelIdxList{bigger})
+            bigger = i;
+        end
+    end
+    for i=1:cc.NumObjects
+        if i ~= bigger
+            outMask(cc.PixelIdxList{i}) = 0;
+        end
+    end
+  end
+  outMask = logical(outMask == 0);
+    cc = bwconncomp(outMask, 4);
+  if cc.NumObjects > 1
+    bigger = 1;
+    for i=2:cc.NumObjects
+        if length(cc.PixelIdxList{i}) > length(cc.PixelIdxList{bigger})
+            bigger = i;
+        end
+    end
+    for i=1:cc.NumObjects
+        if length(cc.PixelIdxList{i}) < length(cc.PixelIdxList{bigger})/2
+            outMask(cc.PixelIdxList{i}) = 0;
+        end
+    end
   end
   
-  grayDepthMap = med;
-  jetDepthMap = ind2rgb(gray2ind(med,1024), jet(1024));
-
+  im = rgb2gray(image);
 end

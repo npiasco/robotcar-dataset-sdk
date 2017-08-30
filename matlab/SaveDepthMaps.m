@@ -9,7 +9,7 @@ function SaveDepthMaps( timestamps, cameras, root_dir, correct_rotation, double_
         double_scan = false;
         disp('No double scan used')
     else
-        double_scan = [root_dir 'lms_rear/'];
+        double_scan = [root_dir double_scan];
     end
     
     im = dlmread(timestamps);

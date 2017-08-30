@@ -7,8 +7,8 @@ addpath matlab/
 %%
 %run_number = '2014-06-24-14-47-45'; % Query with front + left + right
 %run_number = '2014-12-05-15-42-07';
-%run_number = '2014-06-26-09-31-18'; % Robotcar_D1
-run_number = '2014-07-14-14-49-50' % Full Oxford
+run_number = '2014-06-26-09-31-18'; % Robotcar_D1
+%run_number = '2014-07-14-14-49-50' % Full Oxford
 extrinsics_dir = 'extrinsics/';
 models_dir = 'models/';
 
@@ -32,6 +32,7 @@ laser_timestamps_file = ['../' run_number '/lms_front.timestamps'];
 laser_timestamps = dlmread(laser_timestamps_file);
 
 ProjectLaserIntoCamera(images_dir, laser_dir, ins_file, models_dir, extrinsics_dir, images_timestamps(3900,1));
+[imgray, imcoul] = CreatDepthMap(images_dir, laser_dir, ins_file, models_dir, extrinsics_dir, images_timestamps(3900,1));
 BuildPointcloud(laser_dir, ins_file, extrinsics_dir, laser_timestamps(1,1), laser_timestamps(end,1), laser_timestamps(floor(length(laser_timestamps)/2),1));
 
 %%
