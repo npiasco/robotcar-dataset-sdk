@@ -2,7 +2,7 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
 %SAVEDEPTHMAPS Summary of this function goes here
 %   Detailed explanation goes here
 %   Use Bevilacqua algorithm
-    parpool(12);
+    parpool(24);
 
     
     inpainting_path = '~/Dev/marcos-lidar_image/';
@@ -39,7 +39,10 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
     
     parfor i=1:n_im
         ind_cam = 1;
-        if cameras(1) % left
+
+	depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_left.jpg'];
+	ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_left.jpg'];
+        if cameras(1) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file') % left
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'mono_left/'], ...
                 [root_dir 'lms_front/'], [root_dir 'vo/vo.csv'], 'models/', 'extrinsics/', ...
                 im_ts(i,ind_cam) , double_scan, false);
@@ -59,22 +62,28 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
                 refMap = imcrop(refMap, rect);
             end
             
-            imwrite(depthMap, [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_left.jpg'], 'jpg');
-            imwrite(refMap, [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_left.jpg'], 'jpg');
+            imwrite(depthMap, depth_name_file, 'jpg');
+            imwrite(refMap, ref_name_file, 'jpg');
             ind_cam = ind_cam + 1;
         end
-        if cameras(2) % rear
+	
+	depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_rear.jpg'];
+        ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_rear.jpg'];
+        if cameras(2) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file')% rear
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'mono_rear/'], ...
                 [root_dir 'lms_front/'], [root_dir 'vo/vo.csv'], 'models/', 'extrinsics/', ...
                 im_ts(i,ind_cam) , double_scan, false);
 
             [u_in, uf, rf, bf] = lidar_mi3s(im, rm, fm, outMask, Params);
 
-            imwrite(uf, [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_rear.jpg'], 'jpg');
-            imwrite(rf, [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_rear.jpg'], 'jpg');
+            imwrite(uf, depth_name_file, 'jpg');
+            imwrite(rf, ref_name_file, 'jpg');
             ind_cam = ind_cam + 1;
         end
-        if cameras(3) % right
+
+	depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_right.jpg'];
+        ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_right.jpg'];
+        if cameras(3) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file')% right
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'mono_right/'], ...
                 [root_dir 'lms_front/'], [root_dir 'vo/vo.csv'], 'models/', 'extrinsics/', ...
                 im_ts(i,ind_cam) , double_scan, false);
@@ -93,19 +102,22 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
                 depthMap = imcrop(depthMap, rect);
                 refMap = imcrop(refMap, rect);
             end
-            imwrite(depthMap, [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_right.jpg'], 'jpg');
-            imwrite(refMap, [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_right.jpg'], 'jpg');
+            imwrite(depthMap, depth_name_file, 'jpg');
+            imwrite(refMap, ref_name_file, 'jpg');
             ind_cam = ind_cam + 1;
         end
-        if cameras(4) % centre
+
+        depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
+        ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
+	if cameras(4) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file')% centre
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'stereo/centre/'], ...
                 [root_dir 'lms_front/'], [root_dir 'vo/vo.csv'], 'models/', 'extrinsics/', ...
                 im_ts(i,ind_cam) , double_scan, false);
 
             [u_in, uf, rf, bf] = lidar_mi3s(im, rm, fm, outMask, Params);
 
-            imwrite(uf, [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_stereo_centre.jpg'], 'jpg');
-            imwrite(rf, [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_stereo_centre.jpg'], 'jpg');
+            imwrite(uf, depth_name_file, 'jpg');
+            imwrite(rf, ref_name_file, 'jpg');
         end
         if ~mod(i,5)
             disp(['Saving progression: ' int2str(i*sum(cameras==true)) ' / ' int2str(n_im*sum(cameras==true))])
