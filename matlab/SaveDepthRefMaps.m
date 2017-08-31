@@ -66,6 +66,9 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             imwrite(refMap, ref_name_file, 'jpg');
             ind_cam = ind_cam + 1;
         end
+	if cameras(1)
+            ind_cam = ind_cam + 1;
+	end
 	
 	depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_rear.jpg'];
         ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_rear.jpg'];
@@ -80,7 +83,9 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             imwrite(rf, ref_name_file, 'jpg');
             ind_cam = ind_cam + 1;
         end
-
+	if cameras(2)
+            ind_cam = ind_cam + 1;
+        end
 	depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_right.jpg'];
         ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_right.jpg'];
         if cameras(3) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file')% right
@@ -104,6 +109,9 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             end
             imwrite(depthMap, depth_name_file, 'jpg');
             imwrite(refMap, ref_name_file, 'jpg');
+            ind_cam = ind_cam + 1;
+        end
+	if cameras(3)
             ind_cam = ind_cam + 1;
         end
 
