@@ -40,8 +40,8 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
     parfor i=1:n_im
         ind_cam = 1;
 
-	depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_left.jpg'];
-	ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_left.jpg'];
+        depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_left.jpg'];
+        ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_left.jpg'];
         if cameras(1) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file') % left
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'mono_left/'], ...
                 [root_dir 'lms_front/'], [root_dir 'vo/vo.csv'], 'models/', 'extrinsics/', ...
@@ -64,13 +64,12 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             
             imwrite(depthMap, depth_name_file, 'jpg');
             imwrite(refMap, ref_name_file, 'jpg');
+        end
+        if cameras(1)
             ind_cam = ind_cam + 1;
         end
-	if cameras(1)
-            ind_cam = ind_cam + 1;
-	end
 	
-	depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_rear.jpg'];
+        depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_rear.jpg'];
         ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_rear.jpg'];
         if cameras(2) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file')% rear
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'mono_rear/'], ...
@@ -81,12 +80,11 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
 
             imwrite(uf, depth_name_file, 'jpg');
             imwrite(rf, ref_name_file, 'jpg');
+        end
+        if cameras(2)
             ind_cam = ind_cam + 1;
         end
-	if cameras(2)
-            ind_cam = ind_cam + 1;
-        end
-	depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_right.jpg'];
+        depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_right.jpg'];
         ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_right.jpg'];
         if cameras(3) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file')% right
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'mono_right/'], ...
@@ -109,15 +107,14 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             end
             imwrite(depthMap, depth_name_file, 'jpg');
             imwrite(refMap, ref_name_file, 'jpg');
-            ind_cam = ind_cam + 1;
         end
-	if cameras(3)
+        if cameras(3)
             ind_cam = ind_cam + 1;
         end
 
         depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
         ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
-	if cameras(4) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file')% centre
+        if cameras(4) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file')% centre
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'stereo/centre/'], ...
                 [root_dir 'lms_front/'], [root_dir 'vo/vo.csv'], 'models/', 'extrinsics/', ...
                 im_ts(i,ind_cam) , double_scan, false);
