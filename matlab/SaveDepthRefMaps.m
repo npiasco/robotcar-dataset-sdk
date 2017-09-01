@@ -46,7 +46,6 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'mono_left/'], ...
                 [root_dir 'lms_front/'], [root_dir 'vo/vo.csv'], 'models/', 'extrinsics/', ...
                 im_ts(i,ind_cam) , double_scan, false);
-            
             [u_in, uf, rf, bf] = lidar_mi3s(im, rm, fm, outMask, Params);
             
             if correct_rotation
@@ -75,7 +74,8 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'mono_rear/'], ...
                 [root_dir 'lms_front/'], [root_dir 'vo/vo.csv'], 'models/', 'extrinsics/', ...
                 im_ts(i,ind_cam) , double_scan, false);
-
+            if (rm == 0); rm(:,:) = 1; end
+            if (fm == 0); fm(:,:) = 1; end
             [u_in, uf, rf, bf] = lidar_mi3s(im, rm, fm, outMask, Params);
 
             imwrite(uf, depth_name_file, 'jpg');
@@ -118,7 +118,8 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'stereo/centre/'], ...
                 [root_dir 'lms_front/'], [root_dir 'vo/vo.csv'], 'models/', 'extrinsics/', ...
                 im_ts(i,ind_cam) , double_scan, false);
-
+            if (rm == 0); rm(:,:) = 1; end
+            if (fm == 0); fm(:,:) = 1; end
             [u_in, uf, rf, bf] = lidar_mi3s(im, rm, fm, outMask, Params);
 
             imwrite(uf, depth_name_file, 'jpg');
@@ -129,4 +130,3 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
         end
     end
 end
-
