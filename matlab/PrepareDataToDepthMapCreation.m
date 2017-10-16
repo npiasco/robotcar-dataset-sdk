@@ -58,10 +58,10 @@ function [im, rm, fm, outMask] = PrepareDataToDepthMapCreation(image_dir, laser_
   switch camera
       case 'stereo'
           [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, ...
-    extrinsics_dir, laser_timestamp(1, 1), laser_timestamp(end, 1), image_timestamp);
+    extrinsics_dir, image_timestamp-1e7, image_timestamp+5e7, image_timestamp);
           if opt_laser
             [pointcloud2, reflectance2] = BuildPointcloud(opt_laser, ins_file, ...
-    extrinsics_dir, image_timestamp-1e7, opt_laser_timestamp(end, 1), image_timestamp);
+    extrinsics_dir, image_timestamp-1e7, image_timestamp+5e7, image_timestamp);
             pointcloud = [pointcloud pointcloud2];
             reflectance = [reflectance reflectance2];
           end
@@ -85,10 +85,10 @@ function [im, rm, fm, outMask] = PrepareDataToDepthMapCreation(image_dir, laser_
           end
       case 'mono_rear'
           [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, ...
-    extrinsics_dir, laser_timestamp(1,1), laser_timestamp(end,1), image_timestamp);
+    extrinsics_dir, image_timestamp-5e7, image_timestamp+1e7, image_timestamp);
           if opt_laser
             [pointcloud2, reflectance2] = BuildPointcloud(opt_laser, ins_file, ...
-    extrinsics_dir, opt_laser_timestamp(1,1), image_timestamp+1e7, image_timestamp);
+    extrinsics_dir, image_timestamp-5e7, image_timestamp+1e7, image_timestamp);
             pointcloud = [pointcloud pointcloud2];
             reflectance = [reflectance reflectance2];
           end
