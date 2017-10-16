@@ -4,7 +4,6 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
 %   Use Bevilacqua algorithm
     parpool(24);
 
-    
     inpainting_path = '~/Dev/marcos-lidar_image/';
     addpath(inpainting_path)
     addpath([inpainting_path, '/toolbox_general'])
@@ -26,6 +25,8 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
     
     mkdir([root_dir 'DepthMap/images/']);
     mkdir([root_dir 'RefMap/images/']);
+    mkdir([root_dir 'DepthMap/mono_images/']);
+    mkdir([root_dir 'RefMap/mono_images/']);
     
     Params.SaveFlag = 2;
     Params.SavePC = 0;
@@ -42,6 +43,9 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
 
         depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_left.jpg'];
         ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_left.jpg'];
+        mdepth_name_file = [root_dir 'DepthMap/mono_images/' 'depth_' num2str(i,'%0.6d') '_mono_left.jpg'];
+        mref_name_file = [root_dir 'RefMap/mono_images/' 'ref_' num2str(i,'%0.6d') '_mono_left.jpg'];
+
         if cameras(1) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file') % left
             fprintf(1, 'Proceeding left image number %d', i);
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'mono_left/'], ...
@@ -51,12 +55,14 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             if (rm == 0); rm(:,:) = 1; end
             if (fm == 0); fm(:,:) = 1; end
 
-            [u_in, uf, rf, bf] = lidar_mi3s(im, rm, fm, outMask, Params);
+            [u_in, uf, rf, bf, mono_uf, mono_rf] = lidar_mi3s(im, rm, fm, outMask, Params);
             
             if correct_rotation
                 rectification_angle_left = 11; % 11 deg
                 depthMap = imrotate(uf, rectification_angle_left, 'bilinear', 'loose');
                 refMap = imrotate(rf, rectification_angle_left, 'bilinear', 'loose');
+                mdepthMap = imrotate(mono_uf, rectification_angle_left, 'bilinear', 'loose');
+                mrefMap = imrotate(mono_rf, rectification_angle_left, 'bilinear', 'loose');
                 scale = 0.72;
                 [W, H, c] = size(depthMap);
                 Wcroop = floor(W * scale);
@@ -64,10 +70,13 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
                 rect = [floor((W-Wcroop)/2) floor((H-Hcroop)/2) Wcroop Hcroop];
                 depthMap = imcrop(depthMap, rect);
                 refMap = imcrop(refMap, rect);
+                mdepthMap = imcrop(mdepthMap, rect);
+                mrefMap = imcrop(mrefMap, rect);
             end
-            
             imwrite(depthMap, depth_name_file, 'jpg');
             imwrite(refMap, ref_name_file, 'jpg');
+            imwrite(mdepthMap, mdepth_name_file, 'jpg');
+            imwrite(mrefMap, mref_name_file, 'jpg');
         end
         if cameras(1)
             ind_cam = ind_cam + 1;
@@ -75,6 +84,9 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
 	
         depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_rear.jpg'];
         ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_rear.jpg'];
+        mdepth_name_file = [root_dir 'DepthMap/mono_images/' 'depth_' num2str(i,'%0.6d') '_mono_rear.jpg'];
+        mref_name_file = [root_dir 'RefMap/mono_images/' 'ref_' num2str(i,'%0.6d') '_mono_rear.jpg'];
+
         if cameras(2) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file')% rear
             fprintf(1, 'Proceeding rear image number %d', i);
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'mono_rear/'], ...
@@ -82,16 +94,21 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
                 im_ts(i,ind_cam) , double_scan, false);
             if (rm == 0); rm(:,:) = 1; end
             if (fm == 0); fm(:,:) = 1; end
-            [u_in, uf, rf, bf] = lidar_mi3s(im, rm, fm, outMask, Params);
+            [u_in, uf, rf, bf, mono_uf, mono_rf] = lidar_mi3s(im, rm, fm, outMask, Params);
 
             imwrite(uf, depth_name_file, 'jpg');
             imwrite(rf, ref_name_file, 'jpg');
+            imwrite(mono_uf, mdepth_name_file, 'jpg');
+            imwrite(mono_rf, mref_name_file, 'jpg');
+
         end
         if cameras(2)
             ind_cam = ind_cam + 1;
         end
         depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_right.jpg'];
         ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_right.jpg'];
+        mdepth_name_file = [root_dir 'DepthMap/mono_images/' 'depth_' num2str(i,'%0.6d') '_mono_right.jpg'];
+        mref_name_file = [root_dir 'RefMap/mono_images/' 'ref_' num2str(i,'%0.6d') '_mono_right.jpg'];
         if cameras(3) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file')% right
             fprintf(1, 'Proceeding right image number %d', i);
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'mono_right/'], ...
@@ -100,12 +117,14 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             if (rm == 0); rm(:,:) = 1; end
             if (fm == 0); fm(:,:) = 1; end
             
-            [u_in, uf, rf, bf] = lidar_mi3s(im, rm, fm, outMask, Params);
+            [u_in, uf, rf, bf, mono_uf, mono_rf] = lidar_mi3s(im, rm, fm, outMask, Params);
             
             if correct_rotation
                 rectification_angle_right = -11.4; % 11.4 deg
                 depthMap = imrotate(uf, rectification_angle_right, 'bilinear', 'loose');
                 refMap = imrotate(rf, rectification_angle_right, 'bilinear', 'loose');
+                mdepthMap = imrotate(mono_uf, rectification_angle_right, 'bilinear', 'loose');
+                mrefMap = imrotate(mono_rf, rectification_angle_right, 'bilinear', 'loose');
                 scale = 0.72;
                 [W, H, c] = size(depthMap);
                 Wcroop = floor(W * scale);
@@ -113,9 +132,13 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
                 rect = [floor((W-Wcroop)/2) floor((H-Hcroop)/2) Wcroop Hcroop];
                 depthMap = imcrop(depthMap, rect);
                 refMap = imcrop(refMap, rect);
+                mdepthMap = imcrop(mdepthMap, rect);
+                mrefMap = imcrop(mrefMap, rect);
             end
             imwrite(depthMap, depth_name_file, 'jpg');
             imwrite(refMap, ref_name_file, 'jpg');
+            imwrite(mdepthMap, mdepth_name_file, 'jpg');
+            imwrite(mrefMap, mref_name_file, 'jpg');
         end
         if cameras(3)
             ind_cam = ind_cam + 1;
@@ -123,6 +146,8 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
 
         depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
         ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
+        mdepth_name_file = [root_dir 'DepthMap/mono_images/' 'depth_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
+        mref_name_file = [root_dir 'RefMap/mono_images/' 'ref_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
         if cameras(4) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file')% centre
             fprintf(1, 'Proceeding front image number %d', i);
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'stereo/centre/'], ...
@@ -130,10 +155,12 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
                 im_ts(i,ind_cam) , double_scan, false);
             if (rm == 0); rm(:,:) = 1; end
             if (fm == 0); fm(:,:) = 1; end
-            [u_in, uf, rf, bf] = lidar_mi3s(im, rm, fm, outMask, Params);
+            [u_in, uf, rf, bf, mono_uf, mono_rf] = lidar_mi3s(im, rm, fm, outMask, Params);
 
             imwrite(uf, depth_name_file, 'jpg');
             imwrite(rf, ref_name_file, 'jpg');
+            imwrite(mono_uf, mdepth_name_file, 'jpg');
+            imwrite(mono_rf, mref_name_file, 'jpg');
         end
         if ~mod(i,5)
             disp(['Saving progression: ' int2str(i*sum(cameras==true)) ' / ' int2str(n_im*sum(cameras==true))])
