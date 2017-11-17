@@ -1,4 +1,4 @@
-function ProjectLaserIntoCamera(image_dir, laser_dir, ins_file, models_dir, extrinsics_dir, image_timestamp)
+function [rm fm] = ProjectLaserIntoCamera(image_dir, laser_dir, ins_file, models_dir, extrinsics_dir, image_timestamp)
   
 % ProjectLaserIntoCamera - build a pointcloud from LIDAR scans and display it
 %   projected into a camera image
@@ -74,7 +74,7 @@ function ProjectLaserIntoCamera(image_dir, laser_dir, ins_file, models_dir, extr
   % Combine LIDAR scans into a single pointcloud
   % Use a 10 second window either side of the image
   [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, ...
-    extrinsics_dir, image_timestamp-2e7, image_timestamp+2e7, image_timestamp);
+    extrinsics_dir, image_timestamp-5e7, image_timestamp+5e7, image_timestamp);
     
   camera = ...
       regexp(image_dir, '(stereo|mono_left|mono_right|mono_rear)', 'match');
@@ -131,57 +131,84 @@ function ProjectLaserIntoCamera(image_dir, laser_dir, ins_file, models_dir, extr
   
   uv = uv(in_img,:);
   % Colour pointcloud by depth. Alternately, could use reflectance
-  colours = xyz(in_front(in_img), 3);
-
-  figure()
-  subplot(1,2,1)
-  imshow(image);
-  colormap jet;
-  hold on;
-  scatter(uv(:,1),uv(:,2), 90, colours, '.');
-
-  mask = ones(length(uv),1);
-  
-  depth_thresh = 0.4;
   depth = xyz(in_front(in_img), 3);
+  ref = reflectance(in_front(in_img));
+  
+  % Depth thresh 100 m
+  depth_thresh_indexor = depth <= 100;
+  uv = uv(depth_thresh_indexor,:);
+  depth = depth(depth_thresh_indexor);
+  ref = ref(depth_thresh_indexor);
   
   [depth indx_sort] = sort(depth);
   uv = uv(indx_sort,:);
+  ref = ref(indx_sort);
   
+  while length(uv) > 300000
+    indexor = ones(length(uv),1);
+    indexor(floor(end/3):3:end) = 0;
+    indexor = boolean(indexor);
+    uv = uv(indexor,:);
+    depth = depth(indexor);
+    ref = ref(indexor);
+  end
+  
+  mask = ones(length(uv),1);
+  depth_thresh = 0.4;
+ 
+  fprintf('Computing %d points\n', length(mask))
   for i = 1:length(uv)
      if mask(i)
          duv = uv - uv(i,:);
          ddepth = (depth - depth(i));
          duv = duv(:,1) .* duv(:,1) + duv(:,2) .* duv(:,2);
 
-         %seuil = min(duv( duv( abs(ddepth) < min(abs(ddepth(ddepth~=0)))*2 )~=0) )
-
          seuil_grille = min(duv(duv~=0 & ddepth<depth_thresh))*4;
-%         seuil_depth = min(abs(ddepth(ddepth~=0)))*5;
 
-         %[seuil, idx] = min( ddepth( duv < min(duv(duv~=0))*10 ) )
-         %seuil = min(duv(duv<seuil_grille & duv~=0 & abs(ddepth) < seuil_depth));
-    %     sum(duv<seuil_grille & duv~=0 & ddepth < seuil_depth)
          mask(duv<seuil_grille & duv~=0 & ddepth > depth_thresh) = 0;
-
-    %          for j = 1:length(duv)
-    %              if mask(j) && duv(j)<seuil ...
-    %                     && ddepth(j) > depth_thresh
-    %                 mask(j) = 0;
-    %              end
-    %          end
-
-         if mod(i,1000) == 0
+         if mod(i,2000) == 0
              fprintf('Remaining %d\n', length(mask)-sum(mask(i:end)==0)-i)
          end
      end
   end
   
   
-  subplot(1,2,2)
+  figure()
+  subplot(2,3,1)
+  imshow(image);
+  colormap jet;
+  hold on;
+  scatter(uv(:,1),uv(:,2), 90, depth, '.');
+
+  subplot(2,3,2)
   imshow(image);
   colormap jet;
   hold on;
   scatter(uv(mask==1,1),uv(mask==1,2), 90, depth(mask==1), '.');
+  
+  subplot(2,3,3)
+  imshow(image);
+  colormap jet;
+  hold on;
+  scatter(uv(mask==1,1),uv(mask==1,2), 90, ref(mask==1), '.');
+  
+  [h, w, c] = size(image);
+  rm = ones(h, w, 1)*-1;
+  fm = ones(h, w, 1)*-1;
 
+  uv = ceil(uv);
+  for i=1:length(uv)
+      if mask(i)
+        rm(uv(i,2),uv(i,1)) = depth(i);
+        fm(uv(i,2),uv(i,1)) = ref(i);
+      end
+  end
+  subplot(2,3,4)
+  imshow(image);
+  subplot(2,3,5)
+  rm = uint8(rm/100*256);
+  imshow(rm,jet(256))
+  subplot(2,3,6)
+  fm = uint8(fm/1500*256);
+  imshow(fm,jet(256))
 end
