@@ -1,4 +1,4 @@
-function [rm fm] = ProjectLaserIntoCamera(image_dir, laser_dir, ins_file, models_dir, extrinsics_dir, image_timestamp)
+function [rm, fm, rm_coul, fm_coul] = CreatSparseDepthMap(image_dir, laser_dir, ins_file, models_dir, extrinsics_dir, image_timestamp)
   
 % ProjectLaserIntoCamera - build a pointcloud from LIDAR scans and display it
 %   projected into a camera image
@@ -102,7 +102,9 @@ function [rm fm] = ProjectLaserIntoCamera(image_dir, laser_dir, ins_file, models
   [fx, fy, cx, cy, G_camera_image, LUT] = ...
       ReadCameraModel(image_dir, models_dir);
   
-  image = LoadImage(image_dir, image_timestamp, LUT);
+  % JPG format avalable (dataset_light)  
+  %image = LoadImage(image_dir, image_timestamp, LUT);
+  image = imread([image_dir num2str(image_timestamp) '.jpg']);
   if ~image
     error(['No image found for timestamp: ' num2str(image_timestamp)]);
   end
@@ -172,30 +174,31 @@ function [rm fm] = ProjectLaserIntoCamera(image_dir, laser_dir, ins_file, models
      end
   end
   
-  
-  figure()
-  subplot(2,3,1)
-  imshow(image);
-  colormap jet;
-  hold on;
-  scatter(uv(:,1),uv(:,2), 90, depth, '.');
+  display = false;
+  if display 
+      figure()
+      subplot(2,3,1)
+      imshow(image);
+      colormap jet;
+      hold on;
+      scatter(uv(:,1),uv(:,2), 90, depth, '.');
 
-  subplot(2,3,2)
-  imshow(image);
-  colormap jet;
-  hold on;
-  scatter(uv(mask==1,1),uv(mask==1,2), 90, depth(mask==1), '.');
-  
-  subplot(2,3,3)
-  imshow(image);
-  colormap jet;
-  hold on;
-  scatter(uv(mask==1,1),uv(mask==1,2), 90, ref(mask==1), '.');
+      subplot(2,3,2)
+      imshow(image);
+      colormap jet;
+      hold on;
+      scatter(uv(mask==1,1),uv(mask==1,2), 90, depth(mask==1), '.');
+
+      subplot(2,3,3)
+      imshow(image);
+      colormap jet;
+      hold on;
+      scatter(uv(mask==1,1),uv(mask==1,2), 90, ref(mask==1), '.');
+  end
   
   [h, w, c] = size(image);
-  rm = ones(h, w, 1)*-1;
-  fm = ones(h, w, 1)*-1;
-
+  rm = zeros(h, w, 1);
+  fm = zeros(h, w, 1);
   uv = ceil(uv);
   for i=1:length(uv)
       if mask(i)
@@ -203,12 +206,19 @@ function [rm fm] = ProjectLaserIntoCamera(image_dir, laser_dir, ins_file, models
         fm(uv(i,2),uv(i,1)) = ref(i);
       end
   end
-  subplot(2,3,4)
-  imshow(image);
-  subplot(2,3,5)
-  rm = uint8(rm/100*256);
-  imshow(rm,jet(256))
-  subplot(2,3,6)
   fm = uint8(fm/1500*256);
-  imshow(fm,jet(256))
+  rm = uint8(rm/100*256);
+  cm = jet(256);
+  cm(1,:) = [0,0,0];
+  rm_coul = ind2rgb(rm,cm);
+  fm_coul = ind2rgb(fm,cm);
+
+  if display
+      subplot(2,3,4)
+      imshow(image);
+      subplot(2,3,5)
+      imshow(rm_coul)
+      subplot(2,3,6)
+      imshow(fm_coul)
+  end
 end
