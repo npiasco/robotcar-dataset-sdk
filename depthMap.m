@@ -13,14 +13,13 @@ eval_query = '2014-06-24-14-47-45-light';
     
 opt_laser = 'ldmrs/';
 
-run_number = 'Robotcar_D1/Dataset';
+run_number = eval_dataset;
+root_dir = ['/data/visual_based_localization/Robotcar/' run_number '/'];
+timestamps = ['/data/visual_based_localization/Robotcar/' run_number '/timestamps.txt'];
+%SaveDepthMaps( timestamps, [true true true true], root_dir, true);
+
+run_number = eval_query;
 root_dir = ['/data/visual_based_localization/Robotcar/' run_number '/'];
 timestamps = ['/data/visual_based_localization/Robotcar/' run_number '/timestamps.txt'];
 
-SaveDepthMaps( timestamps, [true true true true], root_dir, true);
-
-run_number = 'Robotcar_D1/Query';
-root_dir = ['/data/visual_based_localization/Robotcar/' run_number '/'];
-timestamps = ['/data/visual_based_localization/Robotcar/' run_number '/timestamps.txt'];
-
-SaveDepthMaps( timestamps, [true true true true], root_dir, true);
+SaveDepthMaps( timestamps, [true false true true], root_dir, true);

@@ -2,13 +2,13 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
 %SAVEDEPTHMAPS Summary of this function goes here
 %   Detailed explanation goes here
 %   Use Bevilacqua algorithm
-    parpool(24);
+    %parpool(24);
 
-    inpainting_path = '~/Dev/marcos-lidar_image/';
+    inpainting_path = '~/Dev/marcos-lidar_image';
     addpath(inpainting_path)
     addpath([inpainting_path, '/toolbox_general'])
     addpath([inpainting_path, '/TVL2_classique'])
-    
+    %addAttachedFiles(pool, [inpainting_path, '/TVL2_classique/gradient_mex.mexw64'])
     if ~exist('correct_rotation', 'var')
         correct_rotation = false;
         disp('No rotation correction')
@@ -22,11 +22,16 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
     
     im_ts = dlmread(timestamps);
     n_im = length(im_ts);
-    
-    mkdir([root_dir 'DepthMap/images/']);
-    mkdir([root_dir 'RefMap/images/']);
-    mkdir([root_dir 'DepthMap/mono_images/']);
-    mkdir([root_dir 'RefMap/mono_images/']);
+   
+    depth_map_path = 'DenseDepthMap/images/'
+    mono_depth_map_path = 'DenseDepthMap/mono_images/'
+    ref_map_path = 'DenseRefMap/images/'
+    mono_ref_map_path = 'DenseRefMap/mono_images/'
+	
+    mkdir([root_dir depth_map_path]);
+    mkdir([root_dir ref_map_path]);
+    mkdir([root_dir mono_depth_map_path]);
+    mkdir([root_dir mono_ref_map_path]);
     
     Params.SaveFlag = 2;
     Params.SavePC = 0;
@@ -37,14 +42,15 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
     Params.lambda_d = 1; %0.5 - 0.1 % 0.34 ok
     Params.lambda_r = 1; %1 - 0.5
     Params.NumIter = 500;
+    Params.NoMask = true;
     
     parfor i=1:n_im
         ind_cam = 1;
 
-        depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_left.jpg'];
-        ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_left.jpg'];
-        mdepth_name_file = [root_dir 'DepthMap/mono_images/' 'depth_' num2str(i,'%0.6d') '_mono_left.jpg'];
-        mref_name_file = [root_dir 'RefMap/mono_images/' 'ref_' num2str(i,'%0.6d') '_mono_left.jpg'];
+        depth_name_file = [root_dir depth_map_path 'depth_' num2str(i,'%0.6d') '_mono_left.jpg'];
+        ref_name_file = [root_dir ref_map_path 'ref_' num2str(i,'%0.6d') '_mono_left.jpg'];
+        mdepth_name_file = [root_dir mono_depth_map_path 'depth_' num2str(i,'%0.6d') '_mono_left.jpg'];
+        mref_name_file = [root_dir mono_ref_map_path 'ref_' num2str(i,'%0.6d') '_mono_left.jpg'];
 
         if cameras(1) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file') % left
             fprintf(1, 'Proceeding left image number %d', i);
@@ -82,10 +88,10 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             ind_cam = ind_cam + 1;
         end
 	
-        depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_rear.jpg'];
-        ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_rear.jpg'];
-        mdepth_name_file = [root_dir 'DepthMap/mono_images/' 'depth_' num2str(i,'%0.6d') '_mono_rear.jpg'];
-        mref_name_file = [root_dir 'RefMap/mono_images/' 'ref_' num2str(i,'%0.6d') '_mono_rear.jpg'];
+        depth_name_file = [root_dir depth_map_path 'depth_' num2str(i,'%0.6d') '_mono_rear.jpg'];
+        ref_name_file = [root_dir ref_map_path 'ref_' num2str(i,'%0.6d') '_mono_rear.jpg'];
+        mdepth_name_file = [root_dir mono_depth_map_path 'depth_' num2str(i,'%0.6d') '_mono_rear.jpg'];
+        mref_name_file = [root_dir mono_ref_map_path 'ref_' num2str(i,'%0.6d') '_mono_rear.jpg'];
 
         if cameras(2) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file')% rear
             fprintf(1, 'Proceeding rear image number %d', i);
@@ -105,10 +111,10 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
         if cameras(2)
             ind_cam = ind_cam + 1;
         end
-        depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_mono_right.jpg'];
-        ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_mono_right.jpg'];
-        mdepth_name_file = [root_dir 'DepthMap/mono_images/' 'depth_' num2str(i,'%0.6d') '_mono_right.jpg'];
-        mref_name_file = [root_dir 'RefMap/mono_images/' 'ref_' num2str(i,'%0.6d') '_mono_right.jpg'];
+        depth_name_file = [root_dir depth_map_path 'depth_' num2str(i,'%0.6d') '_mono_right.jpg'];
+        ref_name_file = [root_dir ref_map_path 'ref_' num2str(i,'%0.6d') '_mono_right.jpg'];
+        mdepth_name_file = [root_dir mono_depth_map_path 'depth_' num2str(i,'%0.6d') '_mono_right.jpg'];
+        mref_name_file = [root_dir mono_ref_map_path 'ref_' num2str(i,'%0.6d') '_mono_right.jpg'];
         if cameras(3) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file')% right
             fprintf(1, 'Proceeding right image number %d', i);
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'mono_right/'], ...
@@ -144,10 +150,10 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             ind_cam = ind_cam + 1;
         end
 
-        depth_name_file = [root_dir 'DepthMap/images/' 'depth_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
-        ref_name_file = [root_dir 'RefMap/images/' 'ref_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
-        mdepth_name_file = [root_dir 'DepthMap/mono_images/' 'depth_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
-        mref_name_file = [root_dir 'RefMap/mono_images/' 'ref_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
+        depth_name_file = [root_dir depth_map_path 'depth_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
+        ref_name_file = [root_dir ref_map_path 'ref_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
+        mdepth_name_file = [root_dir mono_depth_map_path 'depth_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
+        mref_name_file = [root_dir mono_ref_map_path 'ref_' num2str(i,'%0.6d') '_stereo_centre.jpg'];
         if cameras(4) && ~exist(depth_name_file, 'file') && ~exist(ref_name_file, 'file')% centre
             fprintf(1, 'Proceeding front image number %d', i);
             [im, rm, fm, outMask] = PrepareDataToDepthMapCreation([root_dir 'stereo/centre/'], ...

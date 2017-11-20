@@ -3,7 +3,6 @@ function [grayDepthMap, jetDepthMap] = CreatDepthMap(image_dir, laser_dir, ins_f
 % Inspired form ProjectLaserIntoCamera 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
   if ~exist('disp', 'var')
     disp = false;
   end
@@ -137,8 +136,8 @@ function [grayDepthMap, jetDepthMap] = CreatDepthMap(image_dir, laser_dir, ins_f
   
   [fx, fy, cx, cy, G_camera_image, LUT] = ...
       ReadCameraModel(image_dir, models_dir);
-  
-  image = LoadImage(image_dir, image_timestamp, LUT);
+  %image = LoadImage(image_dir, image_timestamp, LUT);
+  image = imread([image_dir num2str(image_timestamp) '.jpg']);
   if ~image
     error(['No image found for timestamp: ' num2str(image_timestamp)]);
   end
