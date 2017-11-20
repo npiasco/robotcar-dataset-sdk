@@ -161,7 +161,7 @@ function [rm, fm, rm_coul, fm_coul] = CreatSparseDepthMap(image_dir, laser_dir, 
   fprintf('Computing %d points\n', length(mask))
   for i = 1:length(uv)
      if mask(i)
-         duv = uv - uv(i,:);
+         duv = uv - repmat(uv(i,:),length(uv),1);         
          ddepth = (depth - depth(i));
          duv = duv(:,1) .* duv(:,1) + duv(:,2) .* duv(:,2);
 
