@@ -103,8 +103,8 @@ function [rm, fm, rm_coul, fm_coul] = CreatSparseDepthMap(image_dir, laser_dir, 
       ReadCameraModel(image_dir, models_dir);
   
   % JPG format avalable (dataset_light)  
-  %image = LoadImage(image_dir, image_timestamp, LUT);
-  image = imread([image_dir num2str(image_timestamp) '.jpg']);
+  image = LoadImage(image_dir, image_timestamp, LUT);
+  %image = imread([image_dir num2str(image_timestamp) '.jpg']);
   if ~image
     error(['No image found for timestamp: ' num2str(image_timestamp)]);
   end
@@ -156,25 +156,78 @@ function [rm, fm, rm_coul, fm_coul] = CreatSparseDepthMap(image_dir, laser_dir, 
   end
   
   mask = ones(length(uv),1);
-  depth_thresh = 0.4;
- 
+  %depth_thresh = 0.4;
+  
+  n = length(uv);
+  quartil_at_10 = 100*10/n/100
+  quartil_at_500 = 100*500/n/100
+  quartil_at_10000 = 100*10000/n/100
+
   fprintf('Computing %d points\n', length(mask))
   for i = 1:length(uv)
      if mask(i)
-         duv = uv - repmat(uv(i,:),length(uv),1);         
+         duv = uv - repmat(uv(i,:),length(uv),1);
          ddepth = (depth - depth(i));
          duv = duv(:,1) .* duv(:,1) + duv(:,2) .* duv(:,2);
+         
 
-         seuil_grille = min(duv(duv~=0 & ddepth<depth_thresh))*4;
+         seuil_500_10000 = quantile(duv(duv~=0),[quartil_at_500,quartil_at_10000]);
+         loca_depth_seuil_min_5000 = quantile(abs(ddepth(duv<seuil_500_10000(2))),0.5);
+         mask( duv < seuil_500_10000(1) & duv~=0 &  ddepth > loca_depth_seuil_min_5000) = 0;
+%          
+%          
+%          depthmed = quantile(abs(ddepth(duv<seuil_init & ddepth~=0)),0.50);
+%          depthmean = mean(abs(ddepth(duv<seuil_init & ddepth~=0)));
+%          depthstd = std(abs(ddepth(duv<seuil_init & ddepth~=0)));
+%          
+%          if depthmed > depthstd
+%              depth_thresh = quantile(abs(ddepth(duv<seuil_init & ddepth~=0)),0.5);
+%          else
+%              depth_thresh = quantile(abs(ddepth(duv<seuil_init & ddepth~=0)),0.90);
+%          end
 
-         mask(duv<seuil_grille & duv~=0 & ddepth > depth_thresh) = 0;
+         %min( ...
+          %   ,...
+           %  min(abs(ddepth(duv<seuil_init & duv~=0)))*2 );
+         
+         %seuil_grille = quantile(duv(duv~=0 & abs(ddepth)<depth_thresh),0.005);
+%          seuil_grille = seuil_init;
+         
+         %seuil_grille = quantile(duv(duv(mask)~=0 & ddepth(mask) < depth_thresh),0.05);
+         
+         %depth_thresh = min(abs(ddepth(ddepth~=0 & duv<seuil_init_grille)))*4;
+         %seuil_grille = min(duv(duv~=0 & ddepth<=depth_thresh))*4;
+
+         %mask(duv(mask)<seuil_grille & duv(mask)~=0 & ddepth(mask) > depth_thresh) = 0;
+%          mask( duv < seuil_grille & duv~=0 &  ddepth > depth_thresh) = 0;
          if mod(i,2000) == 0
-             fprintf('Remaining %d\n', length(mask)-sum(mask(i:end)==0)-i)
+%             figure(1);clf
+%             subplot(1,3,1)
+%             imshow(image);
+%             colormap jet;
+%             hold on;
+%             scatter(uv(duv<seuil_10000,1),uv(duv<seuil_10000,2), 90, depth(duv<seuil_10000), '.');
+%             subplot(1,3,2)
+%             imshow(image);
+%             colormap jet;
+%             hold on;
+%             scatter(uv(duv<seuil_50,1),uv(duv<seuil_50,2), 90, depth(duv<seuil_50), '.');
+%             fprintf('Remaining %d\n', length(mask)-sum(mask(i:end)==0)-i)
+%             subplot(1,3,3)
+%             imshow(image);
+%             colormap jet;
+%             hold on;
+%             scatter(uv(duv<seuil_50 & ddepth > loca_depth_seuil_min_2000,1), ...
+%             uv(duv<seuil_50 & ddepth > loca_depth_seuil_min_2000,2), 90, ...
+%             depth(duv<seuil_50 & ddepth > loca_depth_seuil_min_2000), '.');
+%             pause(0.01)
+            fprintf('Remaining %d\n', length(mask)-sum(mask(i:end)==0)-i)
+            
          end
      end
   end
   
-  display = false;
+  display = true;
   if display 
       figure()
       subplot(2,3,1)

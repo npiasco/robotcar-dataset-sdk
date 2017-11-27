@@ -17,7 +17,7 @@ ref_gps_file =  ['../' run_number '/gps/gps.csv'];
 vo_file = ['../' run_number '/vo/vo.csv'];
 ins_file = ['../' run_number '/gps/ins.csv'];
 
-images_dir = ['../' run_number '/stereo/centre/'];
+images_dir = ['../' run_number '/mono_left/'];
 
 laser_dir = ['../' run_number '/lms_front/'];
 
@@ -25,13 +25,14 @@ gps_file = ['../' run_number '/gps/gps.csv'];
 
 %%
 
-images_timestamps_file = ['../' run_number '/stereo.timestamps'];
+images_timestamps_file = ['../' run_number '/mono_left.timestamps'];
 images_timestamps = dlmread(images_timestamps_file);
 
 laser_timestamps_file = ['../' run_number '/lms_front.timestamps'];
 laser_timestamps = dlmread(laser_timestamps_file);
 
-CreatSparseDepthMap(images_dir, laser_dir, vo_file, models_dir, extrinsics_dir, images_timestamps(4000,1));
+[rm, fm, rmm, fmm] = CreatSparseDepthMap(images_dir, laser_dir, vo_file, models_dir, extrinsics_dir, images_timestamps(5640,1));
+[rm, fm, rmm, fmm] = CreatSparseDepthMap(images_dir, laser_dir, vo_file, models_dir, extrinsics_dir, images_timestamps(3640,1));
 [imgray, imcoul] = CreatDepthMap(images_dir, laser_dir, ins_file, models_dir, extrinsics_dir, images_timestamps(3900,1));
 BuildPointcloud(laser_dir, ins_file, extrinsics_dir, laser_timestamps(1,1), laser_timestamps(end,1), laser_timestamps(floor(length(laser_timestamps)/2),1));
 
