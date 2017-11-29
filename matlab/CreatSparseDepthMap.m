@@ -103,8 +103,8 @@ function [rm, fm, rm_coul, fm_coul] = CreatSparseDepthMap(image_dir, laser_dir, 
       ReadCameraModel(image_dir, models_dir);
   
   % JPG format avalable (dataset_light)  
-  image = LoadImage(image_dir, image_timestamp, LUT);
-  %image = imread([image_dir num2str(image_timestamp) '.jpg']);
+  %image = LoadImage(image_dir, image_timestamp, LUT);
+  image = imread([image_dir num2str(image_timestamp) '.jpg']);
   if ~image
     error(['No image found for timestamp: ' num2str(image_timestamp)]);
   end
@@ -146,7 +146,7 @@ function [rm, fm, rm_coul, fm_coul] = CreatSparseDepthMap(image_dir, laser_dir, 
   uv = uv(indx_sort,:);
   ref = ref(indx_sort);
   
-  while length(uv) > 300000
+  while length(uv) > 100000
     indexor = ones(length(uv),1);
     indexor(floor(end/3):3:end) = 0;
     indexor = boolean(indexor);
@@ -156,12 +156,11 @@ function [rm, fm, rm_coul, fm_coul] = CreatSparseDepthMap(image_dir, laser_dir, 
   end
   
   mask = ones(length(uv),1);
-  %depth_thresh = 0.4;
   
   n = length(uv);
-  quartil_at_10 = 100*10/n/100
-  quartil_at_500 = 100*500/n/100
-  quartil_at_10000 = 100*10000/n/100
+  depth_seuil = 0.4;
+  quartil_at_500 = 500/n;
+  quartil_at_10000 = 10000/n;
 
   fprintf('Computing %d points\n', length(mask))
   for i = 1:length(uv)
@@ -170,36 +169,12 @@ function [rm, fm, rm_coul, fm_coul] = CreatSparseDepthMap(image_dir, laser_dir, 
          ddepth = (depth - depth(i));
          duv = duv(:,1) .* duv(:,1) + duv(:,2) .* duv(:,2);
          
+         seuil_adapte = quantile(duv(duv~=0),[quartil_at_500,quartil_at_10000,0.1,0.4]);
+         depth_adapte = max(abs(ddepth(duv<seuil_adapte(1))));
+         adaptive_percent = min(0.5,(seuil_adapte(3)/seuil_adapte(4))) + min(0.5,depth_seuil/depth_adapte);
+         loca_depth_seuil_min_5000 = quantile(abs(ddepth(duv<seuil_adapte(2))),adaptive_percent);
+         mask( duv < seuil_adapte(1)*adaptive_percent & duv~=0 &  ddepth > loca_depth_seuil_min_5000) = 0;
 
-         seuil_500_10000 = quantile(duv(duv~=0),[quartil_at_500,quartil_at_10000]);
-         loca_depth_seuil_min_5000 = quantile(abs(ddepth(duv<seuil_500_10000(2))),0.5);
-         mask( duv < seuil_500_10000(1) & duv~=0 &  ddepth > loca_depth_seuil_min_5000) = 0;
-%          
-%          
-%          depthmed = quantile(abs(ddepth(duv<seuil_init & ddepth~=0)),0.50);
-%          depthmean = mean(abs(ddepth(duv<seuil_init & ddepth~=0)));
-%          depthstd = std(abs(ddepth(duv<seuil_init & ddepth~=0)));
-%          
-%          if depthmed > depthstd
-%              depth_thresh = quantile(abs(ddepth(duv<seuil_init & ddepth~=0)),0.5);
-%          else
-%              depth_thresh = quantile(abs(ddepth(duv<seuil_init & ddepth~=0)),0.90);
-%          end
-
-         %min( ...
-          %   ,...
-           %  min(abs(ddepth(duv<seuil_init & duv~=0)))*2 );
-         
-         %seuil_grille = quantile(duv(duv~=0 & abs(ddepth)<depth_thresh),0.005);
-%          seuil_grille = seuil_init;
-         
-         %seuil_grille = quantile(duv(duv(mask)~=0 & ddepth(mask) < depth_thresh),0.05);
-         
-         %depth_thresh = min(abs(ddepth(ddepth~=0 & duv<seuil_init_grille)))*4;
-         %seuil_grille = min(duv(duv~=0 & ddepth<=depth_thresh))*4;
-
-         %mask(duv(mask)<seuil_grille & duv(mask)~=0 & ddepth(mask) > depth_thresh) = 0;
-%          mask( duv < seuil_grille & duv~=0 &  ddepth > depth_thresh) = 0;
          if mod(i,2000) == 0
 %             figure(1);clf
 %             subplot(1,3,1)
@@ -227,7 +202,7 @@ function [rm, fm, rm_coul, fm_coul] = CreatSparseDepthMap(image_dir, laser_dir, 
      end
   end
   
-  display = true;
+  display = false;
   if display 
       figure()
       subplot(2,3,1)
