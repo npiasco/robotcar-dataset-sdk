@@ -147,13 +147,14 @@ function [rm, fm, rm_coul, fm_coul] = CreatSparseDepthMapHPR(image_dir, laser_di
       imshow(image);
       colormap jet;
       hold on;
-      scatter(uv(:,1),uv(:,2), 90, depth, '.');
+      scatter(uv(:,1),uv(:,2), 90, ref, '.');
 
   end
   
   xyz = xyz(in_front,:);
   visiblePtInds=HPR(xyz(:,1:3),[0,0,0],3);
   xyz = xyz(visiblePtInds,:);
+  reflectance = reflectance(in_front(visiblePtInds));
 
   % Project points into image using a pinhole camera model
   uv = [ fx .* xyz(:,1) ./ xyz(:,3) + cx, ...
@@ -172,24 +173,26 @@ function [rm, fm, rm_coul, fm_coul] = CreatSparseDepthMapHPR(image_dir, laser_di
   uv = uv(in_img,:);
   % Colour pointcloud by depth. Alternately, could use reflectance
   depth = xyz(in_img, 3);
-  ref = reflectance(in_front(in_img));
+  ref = reflectance(in_img);
   
   % Depth thresh 100 m
   depth_thresh_indexor = depth <= 100;
   uv = uv(depth_thresh_indexor,:);
   depth = depth(depth_thresh_indexor);
   ref = ref(depth_thresh_indexor);
-
+  ref_max = 1000;
+  ref_min = 100;
+  ref(ref>ref_max) = ref_max;
   
   if display 
       subplot(2,3,3)
       imshow(image);
       colormap jet;
       hold on;
-      scatter(uv(:,1),uv(:,2), 90, depth, '.');
+      scatter(uv(:,1),uv(:,2), 90, ref, '.');
   end
   
-  [h,w,c] = size(image)
+  [h,w,c] = size(image);
   
   rm = zeros(h, w, 1);
   fm = zeros(h, w, 1);
@@ -200,7 +203,7 @@ function [rm, fm, rm_coul, fm_coul] = CreatSparseDepthMapHPR(image_dir, laser_di
     fm(uv(i,2),uv(i,1)) = ref(i);
   end
   
-  fm = uint8(fm/1500*256);
+  fm = uint8((fm-ref_min)/(ref_max-ref_min)*256);
   rm = uint8(rm/100*256);
   cm = jet(256);
   cm(1,:) = [0,0,0];
