@@ -22,6 +22,10 @@ function visiblePtInds=HPR(p,C,param)
 
 dim=size(p,2);
 numPts=size(p,1);
+if numPts==0
+	visiblePtInds = zeros(0,dim)
+	return 
+end
 p=p-repmat(C,[numPts 1]);%Move C to the origin
 normp=sqrt(dot(p,p,2));%Calculate ||p||
 R=repmat(max(normp)*(10^param),[numPts 1]);%Sphere radius
