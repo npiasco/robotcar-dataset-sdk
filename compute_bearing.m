@@ -20,7 +20,7 @@ for f=1:length(files)
     coordxIm = zeros(n*4,3);
     for i = 1:4:length(coordxIm)
         id = round(i/4+1);
-        for j=i:i+4
+        for j=i:i+3
             coordxIm(j,:) = [traj(id, 1), traj(id, 2), bearings(id)];
         end
         coordxIm(i,3) = mod(bearings(id) - 7*pi/32, pi); % left
