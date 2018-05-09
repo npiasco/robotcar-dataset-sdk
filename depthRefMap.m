@@ -20,7 +20,7 @@ opt_laser = 'ldmrs/';
 
 run_numbers = {train_5, train_6};
 for i = 1:length(run_numbers)
-	run_number = run_numbers{i};
+	run_number = run_numbers{i}
 	root_dir = ['/data/visual_based_localization/Robotcar/' run_number '/'];
 	timestamps = ['/data/visual_based_localization/Robotcar/' run_number '/timestamps.txt'];
 	SaveDepthRefMaps( timestamps, [true true true true], root_dir, true);
