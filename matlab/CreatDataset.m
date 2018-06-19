@@ -40,7 +40,13 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
 
         origine = INS{1}(1);
         timestamps = INS{1}(1:droping:end-1);
-        Poses = InterpolatePoses(ins_file, timestamps', origine);        
+        Poses = InterpolatePoses(ins_file, timestamps', origine);
+    elseif strcmp(ins_file(end-6:end-4), 'gps')
+        [Xtmp, Ytmp] = PlotGPS(ins_file);
+        headers = textscan(ins_file_id, '%s', 12, 'Delimiter',',');
+        GPS = textscan(ins_file_id, ...
+          '%u64 %u64 %f %f %f %f %f %f %f %f %f %s','Delimiter',',');
+        timestamps = GPS{1}(1:end-1);
     else % VO
         headers = textscan(ins_file_id, '%s', 8, 'Delimiter',',');
         VO = textscan(ins_file_id, ...
@@ -51,14 +57,24 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
         Poses = RelativeToAbsolutePoses(ins_file, timestamps', origine);
     end
     fclose(ins_file_id);
+    
+    if strcmp(ins_file(end-6:end-4), 'gps')
+        l = floor(crop_path*length(Xtmp));
+        X = zeros(l,1);
+        Y = zeros(l,1);
+        for i = 1:l
+            X(i) = Xtmp(i);
+            Y(i) = Ytmp(i);
+        end
 
-    l = floor(crop_path*length(Poses));
-    X = zeros(l,1);
-    Y = zeros(l,1);
-
-    for i = 1:l
-        X(i) = Poses{i}(1,4);
-        Y(i) = Poses{i}(2,4);
+    else
+        l = floor(crop_path*length(Poses));
+        X = zeros(l,1);
+        Y = zeros(l,1);
+        for i = 1:l
+            X(i) = Poses{i}(1,4);
+            Y(i) = Poses{i}(2,4);
+        end
     end
     
     %% Registration across reference path

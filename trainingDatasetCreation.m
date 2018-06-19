@@ -5,31 +5,33 @@ clc;
 
 addpath matlab/
 %%
-train_1 = '2014-05-06-13-09-52'; % BAD
-train_2 = '2014-06-23-15-36-04';
-train_3 = '2014-06-24-14-09-07';
-train_4 = '2014-06-26-08-53-56';
-
 extrinsics_dir = 'extrinsics/';
 models_dir = 'models/';
 
 %%
 
-run_number = train_4;
+%run_number = ['../../robotcar_dw/' '11/2015-11-10-14-15-57'];
+%run_number = ['../../robotcar_dw/' '08/2015-08-28-09-50-22'];
+%run_number = ['../../robotcar_dw/' '02/2015-02-27-18-09-02'];
+%run_number = ['../../robotcar_dw/' '05/2015-05-19-14-06-38'];
+run_number = ['../../robotcar_dw/' '02_day/2015-02-10-11-58-05'];
 
-ref_gps_file =  ['../training/' train_1 '/gps/gps.csv'];
-vo_file = ['../training/' run_number '/vo/vo.csv'];
-ins_file = ['../training/' run_number '/gps/ins.csv'];
 
-images_dir = ['../training/' run_number '/stereo/centre/'];
+ref_gps_file =  ['../../robotcar_dw/' '11/2015-11-10-14-15-57-light' '/gps/gps.csv'];
+vo_file = [run_number '/vo/vo.csv'];
+ins_file = [run_number '/gps/ins.csv'];
 
-laser_dir = ['../training/' run_number '/lms_front/'];
+images_dir = [run_number '/stereo/centre/'];
 
-gps_file = ['../training/' run_number '/gps/gps.csv'];
+laser_dir = [run_number '/lms_front/'];
+
+gps_file = [run_number '/gps/gps.csv'];
 
 
 %%
 CompareVOtoINS(ins_file, vo_file, gps_file)
 %%
-images_dir = ['../training/' run_number '/'];
-CreatDataset( ins_file, ref_gps_file, images_dir, models_dir, 2, [true true true true], true, 'TrainDataset4v2'); % Dataset
+images_dir = [run_number '/'];
+step = 5; % metre
+crop_path = 0.57; % percent
+CreatDataset(gps_file, ref_gps_file, images_dir, models_dir, step, [true true true true], true, 'TrainDataset_02_10_15', crop_path); % Dataset

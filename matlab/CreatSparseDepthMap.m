@@ -112,10 +112,15 @@ function [rm, fm, rm_coul, fm_coul] = CreatSparseDepthMap(image_dir, laser_dir, 
   % Transform pointcloud into camera image frame
   xyz = (G_camera_image \ G_camera_ins ...
       * [pointcloud; ones(1, size(pointcloud,2))]).';
+  
   xyz(:,4) = [];
   
   % Find which points lie in front of the camera
   in_front = find(xyz(:,3) >= 0);
+  
+  visiblePtInds=HPR(xyz(in_front,1:3),[0,0,0],2);
+  size(xyz(in_front,1:3))
+  size(visiblePtInds)
   
   % Project points into image using a pinhole camera model
   uv = [ fx .* xyz(in_front,1) ./ xyz(in_front,3) + cx, ...
