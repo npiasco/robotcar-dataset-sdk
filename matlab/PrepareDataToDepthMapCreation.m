@@ -131,6 +131,12 @@ function [im, rm, fm, outMask] = PrepareDataToDepthMapCreation(image_dir, laser_
   % Find which points lie in front of the camera
   in_front = find(xyz(:,3) >= 0);
   
+  xyz = xyz(in_front,:);
+  visiblePtInds=HPR(xyz(:,1:3),[0,0,0],3);
+  xyz = xyz(visiblePtInds,:);
+  reflectance = reflectance(in_front(visiblePtInds));
+
+  
   % Project points into image using a pinhole camera model
   uv = [ fx .* xyz(in_front,1) ./ xyz(in_front,3) + cx, ...
          fy .* xyz(in_front,2) ./ xyz(in_front,3) + cy];
@@ -147,8 +153,8 @@ function [im, rm, fm, outMask] = PrepareDataToDepthMapCreation(image_dir, laser_
   
   uv = ceil(uv(in_img,:));
     % Colour pointcloud by depth. Alternately, could use reflectance
-  colours = xyz(in_front(in_img), 3);
-  reflectance_colours = reflectance(in_front(in_img));
+  colours = xyz(in_img, 3);
+  reflectance_colours = reflectance(in_img);
   [h, w, c] = size(image);
   rm = zeros(h, w, 1);
   fm = zeros(h, w, 1);

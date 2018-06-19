@@ -22,11 +22,12 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
     
     im_ts = dlmread(timestamps);
     n_im = length(im_ts);
-   
-    depth_map_path = 'DenseDepthMap/images/'
-    mono_depth_map_path = 'DenseDepthMap/mono_images/'
-    ref_map_path = 'DenseRefMap/images/'
-    mono_ref_map_path = 'DenseRefMap/mono_images/'
+    
+    pref = 'HPRDense';
+    depth_map_path = [pref, 'DepthMap/images/'];
+    mono_depth_map_path = [pref, 'DepthMap/mono_images/'];
+    ref_map_path = [pref, 'RefMap/images/'];
+    mono_ref_map_path = [pref, 'RefMap/mono_images/'];
 	
     mkdir([root_dir depth_map_path]);
     mkdir([root_dir ref_map_path]);
