@@ -138,8 +138,8 @@ function [im, rm, fm, outMask] = PrepareDataToDepthMapCreation(image_dir, laser_
 
   
   % Project points into image using a pinhole camera model
-  uv = [ fx .* xyz(in_front,1) ./ xyz(in_front,3) + cx, ...
-         fy .* xyz(in_front,2) ./ xyz(in_front,3) + cy];
+  uv = [ fx .* xyz(:,1) ./ xyz(:,3) + cx, ...
+         fy .* xyz(:,2) ./ xyz(:,3) + cy];
     
   % Find which points have projected within the image bounds
   in_img = (uv(:,1) >= 0.5 & uv(:,1) < size(image,2)-0.5) & ...
