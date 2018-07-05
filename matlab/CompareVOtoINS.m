@@ -1,7 +1,9 @@
 function CompareVOtoINS( ins_file, vo_file, gps_file )
 %COMPAREVOTOINS Summary of this function goes here
 %   Detailed explanation goes here
+    disp('Ploting VO...')
     [X_VO, Y_VO] = PlotVO(vo_file);
+    disp('Ploting INS...')
     [X_INS, Y_INS] = PlotINS(ins_file);
     
     figure

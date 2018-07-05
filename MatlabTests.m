@@ -7,8 +7,9 @@ addpath matlab/
 %%
 %run_number = '2014-06-24-14-47-45'; % Query with front + left + right
 %run_number = '2014-12-05-15-42-07';
-run_number = '2014-06-26-09-31-18'; % Robotcar_D1
+%run_number = '2014-06-26-09-31-18'; % Robotcar_D1
 %run_number = '2014-07-14-14-49-50' % Full Oxford
+run_number = 'Robotcar/training/2015-02-10-11-58-05-light';
 extrinsics_dir = 'extrinsics/';
 models_dir = 'models/';
 
@@ -17,7 +18,7 @@ ref_gps_file =  ['../' run_number '/gps/gps.csv'];
 vo_file = ['../' run_number '/vo/vo.csv'];
 ins_file = ['../' run_number '/gps/ins.csv'];
 
-images_dir = ['../' run_number '/mono_left/'];
+images_dir = ['../' run_number '/stereo/centre'];
 
 laser_dir = ['../' run_number '/lms_front/'];
 
@@ -26,6 +27,7 @@ gps_file = ['../' run_number '/gps/gps.csv'];
 %%
 
 images_timestamps_file = ['../' run_number '/mono_left.timestamps'];
+images_timestamps_file = ['../' run_number '/timestamps.txt'];
 images_timestamps = dlmread(images_timestamps_file);
 
 laser_timestamps_file = ['../' run_number '/lms_front.timestamps'];

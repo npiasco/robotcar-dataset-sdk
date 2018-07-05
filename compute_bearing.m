@@ -1,6 +1,7 @@
 close all;
 
 root = '../training/';
+root = '/Users/n.piasco/Documents/Dev/Robotcar/training/';
 files = {'TrainDataset_02_10_15/', 'TrainDataset_05_19_15/', 'TrainDataset_08_28_15/', 'TrainDataset_11_10_15/'};
 north = [0,1];
 for f=1:length(files)

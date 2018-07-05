@@ -7,8 +7,10 @@ addpath matlab/
 %%
 root_dir = [''];
 %run_number = ['../../robotcar_dw/' '11/2015-11-10-14-15-57'];
-run_number = ['../../robotcar_dw/' '08/2015-08-28-09-50-22'];
+%run_number = ['../../robotcar_dw/' '08/2015-08-28-09-50-22'];
+%run_number = ['../../robotcar_dw/' '05/2015-05-19-14-06-38'];
 %run_number = ['../../robotcar_dw/' '02/2015-02-27-18-09-02'];
+run_number = ['../../robotcar_dw/' '02_day/2015-02-10-11-58-05'];
 
 
 timestamps = [root_dir run_number '-light/timestamps.txt'];
