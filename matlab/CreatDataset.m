@@ -1,4 +1,4 @@
-function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selected_views, correct_rotation, directory, crop_path, display)
+function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selected_views, correct_rotation, directory, crop_path, beg_crop_path, display)
 %CREATDATASET Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -24,13 +24,19 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
     
     if ~exist('crop_path', 'var')
         crop_path = 1;
-        disp('Keeping the entire path')
+        disp('Keeping the end of the path')
     end
+    
+    if ~exist('beg_crop_path', 'var')
+        beg_crop_path = 1;
+        disp('Keeping the begin of the path')
+    end
+
 
     %% Path creation from ins
     disp('Path creation from ins');
     
-    droping = 6; % not enought memory in ram
+    droping = 10; % not enought memory in ram
 
     ins_file_id = fopen(ins_file);
     if strcmp(ins_file(end-6:end-4), 'ins')    
@@ -60,20 +66,22 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
     
     if strcmp(ins_file(end-6:end-4), 'gps')
         l = floor(crop_path*length(Xtmp));
-        X = zeros(l,1);
-        Y = zeros(l,1);
-        for i = 1:l
-            X(i) = Xtmp(i);
-            Y(i) = Ytmp(i);
+        l_beg = length(Xtmp) - floor(beg_crop_path*length(Xtmp)); 
+        X = zeros(l-l_beg,1);
+        Y = zeros(l-l_beg,1);
+        for i = 1:l-l_beg
+            X(i) = Xtmp(l_beg+i);
+            Y(i) = Ytmp(l_beg+i);
         end
 
     else
         l = floor(crop_path*length(Poses));
-        X = zeros(l,1);
-        Y = zeros(l,1);
-        for i = 1:l
-            X(i) = Poses{i}(1,4);
-            Y(i) = Poses{i}(2,4);
+        l_beg = length(Poses) - floor(beg_crop_path*length(Poses));
+        X = zeros(l-l_beg,1);
+        Y = zeros(l-l_beg,1);
+        for i = 1:l-l_beg
+            X(i) = Poses{i+l_beg}(1,4);
+            Y(i) = Poses{i+l_beg}(2,4);
         end
     end
     
