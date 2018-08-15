@@ -107,7 +107,7 @@ function CreatDataset( ins_file, path_ref, images_dir, models_dir, step, selecte
     
     %% Path pruning with provided step
     disp('Path pruning');
-    
+    timestamps = timestamps(l_beg:end);
     [path timestamps_path] = PrunePath(X, Y, timestamps, step, true);
     
     figure;
