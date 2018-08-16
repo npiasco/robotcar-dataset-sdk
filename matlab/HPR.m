@@ -22,7 +22,7 @@ function visiblePtInds=HPR(p,C,param)
 
 dim=size(p,2);
 numPts=size(p,1);
-if numPts < 2
+if numPts < 3
 	visiblePtInds = zeros(0,dim);
 	return 
 end
