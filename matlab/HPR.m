@@ -22,8 +22,8 @@ function visiblePtInds=HPR(p,C,param)
 
 dim=size(p,2);
 numPts=size(p,1);
-if numPts==0
-	visiblePtInds = zeros(0,dim)
+if numPts < 2
+	visiblePtInds = zeros(0,dim);
 	return 
 end
 p=p-repmat(C,[numPts 1]);%Move C to the origin
