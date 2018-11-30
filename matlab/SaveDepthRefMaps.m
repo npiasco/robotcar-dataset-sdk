@@ -23,7 +23,7 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
     im_ts = dlmread(timestamps);
     n_im = length(im_ts);
     
-    pref = 'HPRDense';
+    pref = 'HPRDenseQuery';
     depth_map_path = [pref 'DepthMap/images/'];
     mono_depth_map_path = [pref 'DepthMap/mono_images/'];
     ref_map_path = [pref 'RefMap/images/'];
@@ -43,7 +43,7 @@ function SaveDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
     Params.lambda_d = 1; %0.5 - 0.1 % 0.34 ok
     Params.lambda_r = 1; %1 - 0.5
     Params.NumIter = 500;
-    Params.NoMask = true;
+%    Params.NoMask = false;
     
     parfor i=1:n_im
         ind_cam = 1;

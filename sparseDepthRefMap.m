@@ -18,7 +18,7 @@ eval_query = '2014-06-24-14-47-45-light';
     
 opt_laser = 'ldmrs/';
 
-run_numbers = {train_5, train_6};
+run_numbers = {train_5, train_6, train_7, train_8};
 for i = 1:length(run_numbers)
 	run_number = run_numbers{i};
 	root_dir = ['/data/visual_based_localization/Robotcar/' run_number '/'];
