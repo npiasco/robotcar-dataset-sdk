@@ -25,13 +25,14 @@ opt_laser = 'ldmrs/';
 %run_numbers = {train_5, train_6};
 %run_numbers = {train_5, train_6, train_7};
 %run_numbers = {train_night};
-run_numbers = {train_snow};
+run_numbers = {train_5};
 for i = 1:length(run_numbers)
 	run_number = run_numbers{i}
 	root_dir = ['/data/visual_based_localization/Robotcar/' run_number '/'];
 	timestamps = ['/data/visual_based_localization/Robotcar/' run_number '/timestamps.txt'];
 	%timestamps = ['/data/visual_based_localization/Robotcar/Robotcar_D1/NightQuery/timestamps.txt'];
-	SaveDepthRefMaps( timestamps, [true true true true], root_dir, true);
+	%SaveDepthRefMaps(timestamps, [true true true true], root_dir, true);
+	TrueDepthRefMaps(timestamps, [true true true true], root_dir, true);
 end
 
 %SaveDepthMaps( timestamps, [true true true true], root_dir, true);
