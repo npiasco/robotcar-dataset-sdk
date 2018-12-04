@@ -73,8 +73,8 @@ function TrueDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
                 refMap = imcrop(refMap, rect);
 
             end
-            imwrite(uint16(depthMap*100)), depth_name_file, 'png', 'BitDepth', 16));
-            imwrite(uint16(refMap/2048*1000)), ref_name_file, 'png', 'BitDepth', 16));
+            imwrite(uint16(depthMap*100), depth_name_file, 'png', 'BitDepth', 16);
+            imwrite(uint16(refMap/2048*1000), ref_name_file, 'png', 'BitDepth', 16);
 
         end
         if cameras(1)
@@ -93,8 +93,8 @@ function TrueDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             if (fm == 0); fm(:,:) = 1; end
             [u_in, uf, rf, bf, mono_uf, mono_rf] = lidar_mi3s(im, rm, fm, outMask, Params);
 
-            imwrite(uint16(u_in*100)), depth_name_file, 'png', 'BitDepth', 16));
-            imwrite(uint16(rf/2048*1000)), ref_name_file, 'png', 'BitDepth', 16));
+            imwrite(uint16(u_in*100), depth_name_file, 'png', 'BitDepth', 16);
+            imwrite(uint16(rf/2048*1000), ref_name_file, 'png', 'BitDepth', 16);
 
 
         end
@@ -127,8 +127,8 @@ function TrueDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
                 refMap = imcrop(refMap, rect);
 
             end
-            imwrite(uint16(depthMap*100)), depth_name_file, 'png', 'BitDepth', 16));
-            imwrite(uint16(refMap/2048*1000)), ref_name_file, 'png', 'BitDepth', 16));
+            imwrite(uint16(depthMap*100), depth_name_file, 'png', 'BitDepth', 16);
+            imwrite(uint16(refMap/2048*1000), ref_name_file, 'png', 'BitDepth', 16);
         end
         if cameras(3)
             ind_cam = ind_cam + 1;
@@ -146,8 +146,8 @@ function TrueDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             if (fm == 0); fm(:,:) = 1; end
             [u_in, uf, rf, bf, mono_uf, mono_rf] = lidar_mi3s(im, rm, fm, outMask, Params);
 
-            imwrite(uint16(u_in*100)), depth_name_file, 'png', 'BitDepth', 16));
-            imwrite(uint16(rf/2048*1000)), ref_name_file, 'png', 'BitDepth', 16));
+            imwrite(uint16(u_in*100), depth_name_file, 'png', 'BitDepth', 16);
+            imwrite(uint16(rf/2048*1000), ref_name_file, 'png', 'BitDepth', 16);
         end
         if ~mod(i,5)
             disp(['Saving progression: ' int2str(i*sum(cameras==true)) ' / ' int2str(n_im*sum(cameras==true))])
