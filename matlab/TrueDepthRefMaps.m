@@ -63,7 +63,7 @@ function TrueDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             if correct_rotation
                 rectification_angle_left = 11; % 11 deg
                 depthMap = imrotate(u_in, rectification_angle_left, 'bilinear', 'loose');
-                refMap = imrotate(rf, rectification_angle_left, 'bilinear', 'loose');
+                refMap = imrotate(mono_rf, rectification_angle_left, 'bilinear', 'loose');
                 scale = 0.72;
                 [W, H, c] = size(depthMap);
                 Wcroop = floor(W * scale);
@@ -94,7 +94,7 @@ function TrueDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             [u_in, uf, rf, bf, mono_uf, mono_rf] = lidar_mi3s(im, rm, fm, outMask, Params);
 
             imwrite(uint16(u_in*100)), depth_name_file, 'png', 'BitDepth', 16));
-            imwrite(uint16(rf/2048*1000)), ref_name_file, 'png', 'BitDepth', 16));
+            imwrite(uint16(mono_rf/2048*1000)), ref_name_file, 'png', 'BitDepth', 16));
 
 
         end
@@ -117,7 +117,7 @@ function TrueDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             if correct_rotation
                 rectification_angle_right = -11.4; % 11.4 deg
                 depthMap = imrotate(u_in, rectification_angle_right, 'bilinear', 'loose');
-                refMap = imrotate(rf, rectification_angle_right, 'bilinear', 'loose');
+                refMap = imrotate(mono_rf, rectification_angle_right, 'bilinear', 'loose');
                 scale = 0.72;
                 [W, H, c] = size(depthMap);
                 Wcroop = floor(W * scale);
@@ -147,7 +147,7 @@ function TrueDepthRefMaps( timestamps, cameras, root_dir, correct_rotation, doub
             [u_in, uf, rf, bf, mono_uf, mono_rf] = lidar_mi3s(im, rm, fm, outMask, Params);
 
             imwrite(uint16(u_in*100)), depth_name_file, 'png', 'BitDepth', 16));
-            imwrite(uint16(rf/2048*1000)), ref_name_file, 'png', 'BitDepth', 16));
+            imwrite(uint16(mono_rf/2048*1000)), ref_name_file, 'png', 'BitDepth', 16));
         end
         if ~mod(i,5)
             disp(['Saving progression: ' int2str(i*sum(cameras==true)) ' / ' int2str(n_im*sum(cameras==true))])
